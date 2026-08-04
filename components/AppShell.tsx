@@ -147,9 +147,14 @@ export default function AppShell() {
             onStartRequest={() => startRequest()}
           />
 
-          <button type="button" className="btn btn--request btn--sm" onClick={() => startRequest()}>
+          <button
+            type="button"
+            className="btn btn--request btn--sm"
+            onClick={() => startRequest()}
+            aria-label="Start a request"
+          >
             <RequestIcon />
-            Request
+            <span className="btn__label">Request</span>
           </button>
 
           <a

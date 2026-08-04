@@ -104,6 +104,9 @@ html,
 body {
   margin: 0;
   padding: 0;
+  /* Nothing on this page is meant to scroll sideways — this is a backstop so a
+     stray overflow never turns into a horizontally pannable page. */
+  overflow-x: hidden;
 }
 
 html {
@@ -535,8 +538,6 @@ a:hover {
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
-  /* Vertical scrolling still belongs to the page; only x is ours. */
-  touch-action: pan-y;
   /* overflow-x: auto also clips vertically, so the room a card needs when it
      lifts on hover has to be padded in and pulled back out again. */
   padding: 8px 2px 16px;
@@ -3053,10 +3054,25 @@ textarea.input--sm {
 
   .topbar__row {
     padding: 0 14px;
+    gap: 8px;
   }
 
   .pane__title {
     font-size: 21px;
+  }
+
+  /* The brand, search, Request, GitHub and theme controls all live in one
+     row with no wrap — past this width their text labels no longer fit, so
+     they'd otherwise push the row (and the whole page) wider than the
+     viewport. Icons stay, labels go; every control keeps its aria-label. */
+  .btn--request .btn__label,
+  .tsearch__hint,
+  .themeicon__auto {
+    display: none;
+  }
+
+  .btn--request {
+    padding: 0 10px;
   }
 }
 

@@ -196,7 +196,10 @@ export default function TopSearch({
       >
         <SearchIcon />
         {!open && (
-          <span className="kbd" style={{ border: 0, background: 'none', padding: 0 }}>
+          <span
+            className="kbd tsearch__hint"
+            style={{ border: 0, background: 'none', padding: 0 }}
+          >
             ⌘K
           </span>
         )}
