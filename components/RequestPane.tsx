@@ -2,16 +2,18 @@
 
 import { useMemo, useState } from 'react'
 import {
-  BUDGETS,
   INQUIRY_EMAIL,
   INQUIRY_TYPES,
   MAILTO_LIMIT,
+  SERVICE_AREAS,
   TIMELINES,
   buildBody,
   buildMailto,
   buildSubject,
   looksLikeEmail,
+  type InquiryTypeId,
   type RequestDraft,
+  type ServiceAreaId,
 } from '@/lib/request'
 import type { Project } from '@/lib/types'
 import { CheckIcon, CloseIcon, CopyIcon } from './Icons'
@@ -28,8 +30,8 @@ export default function RequestPane({
 }) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
-  const [type, setType] = useState<RequestDraft['type']>(INQUIRY_TYPES[0])
-  const [budget, setBudget] = useState<RequestDraft['budget']>(BUDGETS[0])
+  const [type, setType] = useState<InquiryTypeId>('question')
+  const [areas, setAreas] = useState<ServiceAreaId[]>([])
   const [timeline, setTimeline] = useState<RequestDraft['timeline']>(TIMELINES[0])
   const [message, setMessage] = useState('')
   const [touched, setTouched] = useState(false)
@@ -40,7 +42,7 @@ export default function RequestPane({
     [selected, projects],
   )
 
-  const draft: RequestDraft = { name, email, type, budget, timeline, message, projects: chosen }
+  const draft: RequestDraft = { name, email, type, areas, timeline, message, projects: chosen }
   const subject = buildSubject(draft)
   const body = buildBody(draft)
   const mailto = buildMailto(draft)
@@ -51,6 +53,12 @@ export default function RequestPane({
   if (!message.trim()) missing.push('a short message')
   const ready = missing.length === 0
   const tooLongForMailto = mailto.length > MAILTO_LIMIT
+
+  function toggleArea(id: ServiceAreaId) {
+    setAreas((current) =>
+      current.includes(id) ? current.filter((a) => a !== id) : [...current, id],
+    )
+  }
 
   async function copyDraft() {
     try {
@@ -67,15 +75,58 @@ export default function RequestPane({
       <div className="pane__head">
         <h1 className="pane__title">Start a request</h1>
         <p className="pane__lede">
-          Tell me what you have in mind and this builds the email for you — project links and all.
-          Nothing is sent from here: you get a finished draft, check it, and send it from your own
-          mail app.
+          Pick what your message is about and this writes the email for you — project links and
+          all. Nothing is sent from here: you get a finished draft, check it, and send it from
+          your own mail app.
         </p>
       </div>
 
       <div className="form">
         <section className="form__section">
-          <h2 className="section__title">Projects this is about</h2>
+          <h2 className="section__title">What kind of request is this?</h2>
+          <div className="chips">
+            {INQUIRY_TYPES.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                className="chip"
+                aria-pressed={type === t.id}
+                onClick={() => setType(t.id)}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="form__section">
+          <h2 className="section__title">Which areas does it touch?</h2>
+          <div className="picks">
+            {SERVICE_AREAS.map((area) => {
+              const on = areas.includes(area.id)
+              return (
+                <button
+                  key={area.id}
+                  type="button"
+                  className="pick"
+                  aria-pressed={on}
+                  onClick={() => toggleArea(area.id)}
+                >
+                  <span className="pick__box" aria-hidden>
+                    {on && <CheckIcon />}
+                  </span>
+                  <span>
+                    <span className="pick__title">{area.title}</span>
+                    <span className="pick__blurb">{area.blurb}</span>
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </section>
+
+        <section className="form__section">
+          <h2 className="section__title">Any specific projects?</h2>
           {chosen.length > 0 && (
             <div className="chips" style={{ marginBottom: 10 }}>
               {chosen.map((p) => (
@@ -115,45 +166,20 @@ export default function RequestPane({
         </section>
 
         <section className="form__section">
-          <h2 className="section__title">What do you need?</h2>
-          <div className="form__row">
-            <label className="field">
-              <span className="field__label">Type of request</span>
-              <select
-                className="select select--wide"
-                value={type}
-                onChange={(e) => setType(e.target.value as RequestDraft['type'])}
-              >
-                {INQUIRY_TYPES.map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
-            </label>
-            <label className="field">
-              <span className="field__label">Budget</span>
-              <select
-                className="select select--wide"
-                value={budget}
-                onChange={(e) => setBudget(e.target.value as RequestDraft['budget'])}
-              >
-                {BUDGETS.map((b) => (
-                  <option key={b}>{b}</option>
-                ))}
-              </select>
-            </label>
-            <label className="field">
-              <span className="field__label">Timeline</span>
-              <select
-                className="select select--wide"
-                value={timeline}
-                onChange={(e) => setTimeline(e.target.value as RequestDraft['timeline'])}
-              >
-                {TIMELINES.map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
-            </label>
-          </div>
+          <h2 className="section__title">Any timeframe in mind?</h2>
+          <label className="field" style={{ maxWidth: 320 }}>
+            <span className="sr-only">Timeline</span>
+            <select
+              className="select select--wide"
+              value={timeline}
+              onChange={(e) => setTimeline(e.target.value as RequestDraft['timeline'])}
+              aria-label="Timeline"
+            >
+              {TIMELINES.map((t) => (
+                <option key={t}>{t}</option>
+              ))}
+            </select>
+          </label>
         </section>
 
         <section className="form__section">

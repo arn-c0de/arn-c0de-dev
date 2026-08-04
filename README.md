@@ -103,18 +103,22 @@ The repository must be public for Pages to publish on a free account.
 
 ## The request tab
 
-Visitors assemble an inquiry — type, budget, timeline, message, and any projects they picked via
-*Ask about this* in a project panel — and get a finished email they only have to send. There is no
-backend: the draft is built in the browser and handed to their own mail client through a `mailto:`
-link, with *Copy draft* as the fallback when no client is configured.
+Visitors pick what their message is about — a request type, one or more topic areas, any projects
+they added via *Ask about this* in a project panel — and get a finished email they only have to
+send. There is no backend: the draft is built in the browser and handed to their own mail client
+through a `mailto:` link, with *Copy draft* as the fallback when no client is configured.
+
+The wording is deliberately neutral. There is no budget field, no rates and no "commissioned work"
+framing, because no business is registered — every kind of inquiry is possible, none of it is
+advertised as a paid service. Keep that in mind when editing the copy.
 
 Everything configurable lives in `lib/request.ts`:
 
 ```ts
 INQUIRY_EMAIL   // where requests go — kept separate from the secure-contact address
-INQUIRY_TYPES   // the "type of request" options
-BUDGETS         // budget ranges
-TIMELINES       // timeline options
+INQUIRY_TYPES   // the request-type chips
+SERVICE_AREAS   // the selectable topic cards
+TIMELINES       // timeframe options
 MAILTO_LIMIT    // above this the UI steers people to Copy draft instead
 ```
 
