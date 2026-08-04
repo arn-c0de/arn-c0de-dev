@@ -7,6 +7,7 @@ import type { DataSource, Project } from '@/lib/types'
 import { TABS, useAppState, type Tab } from '@/lib/useAppState'
 import AboutPane from './AboutPane'
 import ContactPane from './ContactPane'
+import OverviewPane from './OverviewPane'
 import ProjectPanel from './ProjectPanel'
 import ProjectsPane from './ProjectsPane'
 import RequestModal from './RequestModal'
@@ -16,6 +17,7 @@ import TopSearch from './TopSearch'
 import { GitHubIcon, MailIcon } from './Icons'
 
 const TAB_LABELS: Record<Tab, string> = {
+  overview: 'Overview',
   projects: 'Projects',
   stack: 'Stack',
   about: 'About',
@@ -105,7 +107,7 @@ export default function AppShell() {
     <div className="shell">
       <header className="topbar">
         <div className="topbar__row">
-          <button type="button" className="brand" onClick={() => navigate({ tab: 'projects', project: null })}>
+          <button type="button" className="brand" onClick={() => navigate({ tab: 'overview', project: null })}>
             {/* Served from this domain, not from GitHub's avatar CDN. */}
             <img className="brand__mark" src={asset('/avatar.jpg')} alt="" width={26} height={26} />
             arn-c0de
@@ -163,6 +165,15 @@ export default function AppShell() {
       </header>
 
       <main className="main">
+        {tab === 'overview' && (
+          <OverviewPane
+            projects={projects}
+            onNavigate={(t) => navigate({ tab: t, project: null })}
+            onOpenProject={openDetail}
+            onStartRequest={() => startRequest()}
+            onTopicSelect={showTopic}
+          />
+        )}
         {tab === 'projects' && (
           <ProjectsPane
             projects={projects}

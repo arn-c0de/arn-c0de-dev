@@ -3,7 +3,8 @@
 import type { Project } from '@/lib/types'
 import { GitHubIcon } from './Icons'
 
-const PRINCIPLES = [
+/** Shared with the overview tab, which teases the first couple of these. */
+export const PRINCIPLES = [
   {
     title: 'Local by default',
     body: 'If something can run on your machine, it should. That means fewer accounts, fewer uploads and less data leaving your hands.',

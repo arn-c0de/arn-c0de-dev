@@ -99,6 +99,22 @@ export function CopyIcon() {
   )
 }
 
+export function ArrowIcon() {
+  return (
+    <svg {...base} width={14} height={14}>
+      <path d="M3 8h10M9 4l4 4-4 4" />
+    </svg>
+  )
+}
+
+export function ChevronIcon({ dir = 'right' }: { dir?: 'left' | 'right' }) {
+  return (
+    <svg {...base} width={15} height={15}>
+      <path d={dir === 'left' ? 'M10 3 5 8l5 5' : 'M6 3l5 5-5 5'} />
+    </svg>
+  )
+}
+
 export function MailIcon() {
   return (
     <svg {...base} width={14} height={14}>

@@ -2,7 +2,10 @@
 
 import { useCallback, useEffect, useState } from 'react'
 
-export const TABS = ['projects', 'stack', 'about', 'contact'] as const
+export const TABS = ['overview', 'projects', 'stack', 'about', 'contact'] as const
+
+/** The tab a bare URL lands on; also the one omitted from the query string. */
+const DEFAULT_TAB: Tab = 'overview'
 export type Tab = (typeof TABS)[number]
 
 export interface AppState {
@@ -23,7 +26,7 @@ function parse(search: string): AppState {
   // working now that it is a modal rather than a tab.
   const legacyRequestTab = params.get('tab') === 'request'
   return {
-    tab: tab && TABS.includes(tab) ? tab : 'projects',
+    tab: tab && TABS.includes(tab) ? tab : DEFAULT_TAB,
     project: params.get('p'),
     request: params.get('request') === '1' || legacyRequestTab,
     requestFor: forParam ? forParam.split(',').filter(Boolean) : [],
@@ -32,7 +35,7 @@ function parse(search: string): AppState {
 
 function serialise(state: AppState): string {
   const params = new URLSearchParams()
-  if (state.tab !== 'projects') params.set('tab', state.tab)
+  if (state.tab !== DEFAULT_TAB) params.set('tab', state.tab)
   if (state.project) params.set('p', state.project)
   if (state.request) params.set('request', '1')
   if (state.requestFor.length) params.set('for', state.requestFor.join(','))
@@ -48,7 +51,7 @@ function serialise(state: AppState): string {
  */
 export function useAppState(): [AppState, (next: Partial<AppState>) => void] {
   const [state, setState] = useState<AppState>({
-    tab: 'projects',
+    tab: DEFAULT_TAB,
     project: null,
     request: false,
     requestFor: [],

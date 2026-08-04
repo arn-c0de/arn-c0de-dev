@@ -79,6 +79,7 @@ export default function TopSearch({
 
   const commands = useMemo<Command[]>(() => {
     const tabs: { tab: Tab; label: string; hint: string }[] = [
+      { tab: 'overview', label: 'Overview', hint: 'A bit of everything on one page' },
       { tab: 'projects', label: 'Projects', hint: 'Browse the repository grid' },
       { tab: 'stack', label: 'Stack', hint: 'Languages, domains and topics' },
       { tab: 'about', label: 'About', hint: 'Focus areas and working principles' },
