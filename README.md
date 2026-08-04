@@ -85,7 +85,19 @@ Add a `public/CNAME` file containing the hostname if you point a custom domain h
 ## Deployment
 
 Pushing to `main` triggers `.github/workflows/deploy.yml`: typecheck → build → publish `out/` to
-GitHub Pages. Enable it once under **Settings → Pages → Source → GitHub Actions**.
+GitHub Pages.
+
+**Settings → Pages → Source must stay on "GitHub Actions".** If it is ever switched to "Deploy
+from a branch", GitHub's legacy Jekyll builder takes over, publishes the repository root instead
+of the exported `out/` directory, and the site turns into a rendered copy of this README. That is
+the failure mode to recognise: a page titled `arn-c0de-dev` showing this text. Fixing it means
+setting the source back to GitHub Actions and re-running the workflow — the API equivalent is:
+
+```bash
+gh api -X DELETE repos/arn-c0de/arn-c0de-dev/pages
+gh api -X POST   repos/arn-c0de/arn-c0de-dev/pages -f build_type=workflow
+gh workflow run deploy.yml --ref main
+```
 
 The repository must be public for Pages to publish on a free account.
 
