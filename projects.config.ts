@@ -64,8 +64,10 @@ const config: SiteConfig = {
     'ZombieEscape-Preview',
   ],
 
-  // Profile README repo — it is not a project.
-  hidden: ['arn-c0de'],
+  // 'arn-c0de' is the profile README repo, 'arn-c0de-dev' is this website
+  // itself. Drop 'arn-c0de-dev' from this list if you want the site to list
+  // its own source alongside the projects.
+  hidden: ['arn-c0de', 'arn-c0de-dev'],
 
   showForks: false,
   showArchived: false,
