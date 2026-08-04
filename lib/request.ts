@@ -29,6 +29,7 @@ export type InquiryTypeId = (typeof INQUIRY_TYPES)[number]['id']
  * `keywords` only feeds the search — it never appears in the UI.
  */
 export const SERVICE_AREAS = [
+  { id: 'unsure', title: "I'm not sure yet", keywords: 'help advice unclear discuss scoping unsure' },
   { id: 'firmware', title: 'ESP32 & Arduino firmware', keywords: 'embedded microcontroller esp32 esp8266 arduino c cpp platformio' },
   { id: 'lora', title: 'LoRa & mesh networking', keywords: 'radio rf long range mesh multi-hop relay lorawan' },
   { id: 'sensors', title: 'Sensors & data acquisition', keywords: 'adc emg biosignal measurement sampling gpio spectrum fft oscilloscope' },
@@ -47,7 +48,6 @@ export const SERVICE_AREAS = [
   { id: 'desktop', title: 'Desktop applications', keywords: 'qt qt6 pyside gui cross-platform windows linux tkinter' },
   { id: 'android', title: 'Android apps', keywords: 'kotlin jetpack compose mobile mvvm offline sqlcipher room' },
   { id: 'geo', title: 'Maps & geolocation', keywords: 'gps routing markers navigation offline tiles coordinates' },
-  { id: 'unsure', title: 'Not sure yet', keywords: 'help advice unclear discuss scoping' },
 ] as const
 
 export type ServiceAreaId = (typeof SERVICE_AREAS)[number]['id']
@@ -90,7 +90,7 @@ function block(label: string, values: string[]): string[] {
 export function buildSubject(draft: RequestDraft): string {
   const type = typeOf(draft.type).label
   const projects = draft.projects.map((p) => p.title)
-  const areas = areaTitles(draft.areas).filter((t) => t !== 'Not sure yet')
+  const areas = areaTitles(draft.areas.filter((id) => id !== 'unsure'))
 
   const focus = projects.length ? projects : areas
   if (focus.length === 1) return `${type} — ${focus[0]}`

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useId, useMemo, useRef, useState } from 'react'
 import { CheckIcon, SearchIcon } from './Icons'
 
 export interface PickerItem {
@@ -35,6 +35,27 @@ export default function SearchPicker({
   label: string
 }) {
   const [query, setQuery] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const toggleRef = useRef<HTMLButtonElement>(null)
+  const searchId = useId()
+
+  function toggleSearch() {
+    if (searchOpen) {
+      setQuery('')
+      setSearchOpen(false)
+      return
+    }
+
+    setSearchOpen(true)
+    requestAnimationFrame(() => inputRef.current?.focus())
+  }
+
+  function closeSearch() {
+    setQuery('')
+    setSearchOpen(false)
+    requestAnimationFrame(() => toggleRef.current?.focus())
+  }
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -49,18 +70,40 @@ export default function SearchPicker({
   }, [items, query, selected])
 
   return (
-    <>
-      <div className="search search--sm">
-        <span className="search__icon">
-          <SearchIcon />
-        </span>
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={placeholder}
-          aria-label={label}
-        />
+    <div className={`picker${searchOpen ? ' picker--searching' : ''}`}>
+      <div className="picker__search">
+        <div className="picker__searchbox">
+          <input
+            ref={inputRef}
+            id={searchId}
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                e.preventDefault()
+                e.stopPropagation()
+                closeSearch()
+              }
+            }}
+            placeholder={placeholder}
+            aria-label={label}
+            aria-hidden={!searchOpen}
+            tabIndex={searchOpen ? 0 : -1}
+          />
+          <button
+            ref={toggleRef}
+            type="button"
+            className="picker__search-toggle"
+            aria-label={searchOpen ? `Close ${label.toLowerCase()}` : label}
+            aria-expanded={searchOpen}
+            aria-controls={searchId}
+            title={searchOpen ? 'Close search' : label}
+            onClick={toggleSearch}
+          >
+            <SearchIcon />
+          </button>
+        </div>
       </div>
       <div className="arealist">
         {visible.length === 0 ? (
@@ -87,6 +130,6 @@ export default function SearchPicker({
           })
         )}
       </div>
-    </>
+    </div>
   )
 }

@@ -101,7 +101,12 @@ export default function RequestModal({
   }, [onClose])
 
   function toggleArea(id: ServiceAreaId) {
-    setAreas((c) => (c.includes(id) ? c.filter((a) => a !== id) : [...c, id]))
+    setAreas((current) => {
+      if (id === 'unsure') return current.includes(id) ? [] : [id]
+
+      const specific = current.filter((area) => area !== 'unsure')
+      return specific.includes(id) ? specific.filter((area) => area !== id) : [...specific, id]
+    })
   }
 
   async function copyDraft() {

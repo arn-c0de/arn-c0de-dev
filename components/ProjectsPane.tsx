@@ -151,10 +151,11 @@ export default function ProjectsPane({
         </div>
       ) : (
         <div className="grid">
-          {visible.map((p) => (
+          {visible.map((p, i) => (
             <ProjectCard
               key={p.name}
               project={p}
+              index={i}
               onOpen={onOpen}
               showFeaturedBadge={showAll || filtersActive}
             />

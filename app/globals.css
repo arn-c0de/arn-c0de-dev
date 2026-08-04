@@ -9,66 +9,75 @@
   --shell-max: 1180px;
   --header-h: 108px;
 
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-snap: cubic-bezier(0.16, 1, 0.3, 1);
+
   /* Light theme is the default; the dark block below overrides it. */
-  --bg: #f6f7f9;
+  --bg: #f5f6fa;
   --bg-panel: #ffffff;
-  --bg-inset: #f0f2f5;
-  --bg-hover: #eceff3;
-  --border: #dfe3e9;
-  --border-strong: #c9cfd8;
-  --text: #12151a;
-  --text-muted: #5b6472;
-  --text-faint: #8b94a3;
-  --accent: #1f6feb;
-  --accent-soft: #e6efff;
+  --bg-inset: #eef0f6;
+  --bg-hover: #e9ecf3;
+  --border: #e0e3ec;
+  --border-strong: #c9cede;
+  --text: #14161f;
+  --text-muted: #5c6379;
+  --text-faint: #8b92a7;
+  --accent: #4f46e5;
+  --accent-2: #7c5cfa;
+  --accent-soft: #e9e8fc;
   --accent-text: #ffffff;
   --star: #b8860b;
-  --shadow-sm: 0 1px 2px rgba(16, 22, 32, 0.06);
-  --shadow-md: 0 4px 16px rgba(16, 22, 32, 0.08);
-  --shadow-lg: 0 24px 60px rgba(16, 22, 32, 0.18);
-  --scrim: rgba(16, 22, 32, 0.32);
+  --grid-line: rgba(28, 32, 68, 0.05);
+  --shadow-sm: 0 1px 2px rgba(18, 20, 45, 0.06);
+  --shadow-md: 0 4px 16px rgba(18, 20, 45, 0.09);
+  --shadow-lg: 0 24px 60px rgba(18, 20, 45, 0.2);
+  --scrim: rgba(16, 18, 34, 0.36);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #0a0c10;
-    --bg-panel: #12151b;
-    --bg-inset: #171b22;
-    --bg-hover: #1c212a;
-    --border: #252b35;
-    --border-strong: #3a424f;
-    --text: #e7eaf0;
-    --text-muted: #9aa4b4;
-    --text-faint: #6b7688;
-    --accent: #5b9dff;
-    --accent-soft: #16233a;
-    --accent-text: #06131f;
+    --bg: #0a0b11;
+    --bg-panel: #12141d;
+    --bg-inset: #171a25;
+    --bg-hover: #1c2030;
+    --border: #242938;
+    --border-strong: #3a4257;
+    --text: #e8eaf3;
+    --text-muted: #9aa3ba;
+    --text-faint: #6b7390;
+    --accent: #8b93ff;
+    --accent-2: #b39dff;
+    --accent-soft: #1c2040;
+    --accent-text: #0a0b11;
     --star: #e3b341;
+    --grid-line: rgba(150, 160, 255, 0.055);
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
     --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.6);
-    --scrim: rgba(4, 6, 10, 0.66);
+    --scrim: rgba(3, 4, 10, 0.66);
   }
 }
 
 :root[data-theme='dark'] {
-  --bg: #0a0c10;
-  --bg-panel: #12151b;
-  --bg-inset: #171b22;
-  --bg-hover: #1c212a;
-  --border: #252b35;
-  --border-strong: #3a424f;
-  --text: #e7eaf0;
-  --text-muted: #9aa4b4;
-  --text-faint: #6b7688;
-  --accent: #5b9dff;
-  --accent-soft: #16233a;
-  --accent-text: #06131f;
+  --bg: #0a0b11;
+  --bg-panel: #12141d;
+  --bg-inset: #171a25;
+  --bg-hover: #1c2030;
+  --border: #242938;
+  --border-strong: #3a4257;
+  --text: #e8eaf3;
+  --text-muted: #9aa3ba;
+  --text-faint: #6b7390;
+  --accent: #8b93ff;
+  --accent-2: #b39dff;
+  --accent-soft: #1c2040;
+  --accent-text: #0a0b11;
   --star: #e3b341;
+  --grid-line: rgba(150, 160, 255, 0.055);
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
   --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.6);
-  --scrim: rgba(4, 6, 10, 0.66);
+  --scrim: rgba(3, 4, 10, 0.66);
 }
 
 /* ── Base ───────────────────────────────────────────────────────────────── */
@@ -85,14 +94,44 @@ body {
   padding: 0;
 }
 
-body {
+html {
   background: var(--bg);
+}
+
+body {
   color: var(--text);
   font-family: var(--font-sans);
   font-size: 15px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/* Quiet atmosphere behind everything: two soft accent glows falling in from
+   the top plus a fine grid that fades out. Fixed and non-interactive, so it
+   costs nothing while scrolling. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(1100px 520px at 16% -12%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 62%),
+    radial-gradient(900px 460px at 86% -14%, color-mix(in srgb, var(--accent-2) 7%, transparent), transparent 62%);
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0 0 auto;
+  height: 440px;
+  z-index: -1;
+  pointer-events: none;
+  background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, #000 20%, transparent);
 }
 
 button,
@@ -145,6 +184,7 @@ a:hover {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }
@@ -161,8 +201,9 @@ a:hover {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter: blur(12px);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(14px) saturate(1.5);
+  -webkit-backdrop-filter: blur(14px) saturate(1.5);
   border-bottom: 1px solid var(--border);
 }
 
@@ -202,6 +243,12 @@ a:hover {
   flex-shrink: 0;
   border: 1px solid var(--border);
   background: var(--bg-inset);
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.brand:hover .brand__mark {
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .topbar__spacer {
@@ -221,13 +268,18 @@ a:hover {
   border-radius: var(--radius-sm);
   color: var(--text-muted);
   cursor: pointer;
-  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.15s var(--ease);
 }
 
 .iconbtn:hover {
   background: var(--bg-hover);
   color: var(--text);
   border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.iconbtn:active {
+  transform: translateY(0) scale(0.96);
 }
 
 .kbd {
@@ -245,6 +297,7 @@ a:hover {
 /* Tabs */
 
 .tabs {
+  position: relative;
   max-width: var(--shell-max);
   margin: 0 auto;
   padding: 0 12px;
@@ -270,7 +323,7 @@ a:hover {
   cursor: pointer;
   white-space: nowrap;
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-  transition: color 0.12s, background 0.12s;
+  transition: color 0.15s, background 0.15s;
 }
 
 .tab:hover {
@@ -282,13 +335,16 @@ a:hover {
   color: var(--text);
 }
 
-.tab[aria-selected='true']::after {
-  content: '';
+/* Shared underline that glides to the active tab; positioned from JS. */
+.tabs__indicator {
   position: absolute;
-  inset: auto 10px -1px 10px;
+  bottom: 0;
+  left: 0;
   height: 2px;
-  background: var(--accent);
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
   border-radius: 2px 2px 0 0;
+  pointer-events: none;
+  transition: transform 0.3s var(--ease), width 0.3s var(--ease);
 }
 
 .tab__count {
@@ -310,13 +366,13 @@ a:hover {
 }
 
 .pane {
-  animation: rise 0.2s ease-out;
+  animation: rise 0.35s var(--ease) both;
 }
 
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(10px);
   }
 }
 
@@ -368,7 +424,7 @@ a:hover {
 .search input:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
 .search input::placeholder {
@@ -419,6 +475,7 @@ a:hover {
   background-size: 4px 4px, 4px 4px;
   background-repeat: no-repeat;
   color: var(--text-muted);
+  transition: border-color 0.15s, color 0.15s;
 }
 
 .select:hover {
@@ -446,18 +503,24 @@ a:hover {
   font-weight: 550;
   color: var(--text-muted);
   cursor: pointer;
-  transition: all 0.12s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.15s var(--ease), box-shadow 0.15s;
 }
 
 .chip:hover {
   border-color: var(--border-strong);
   color: var(--text);
+  transform: translateY(-1px);
+}
+
+.chip:active {
+  transform: translateY(0) scale(0.97);
 }
 
 .chip[aria-pressed='true'] {
-  background: var(--text);
-  border-color: var(--text);
-  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 .chip__n {
@@ -486,17 +549,27 @@ a:hover {
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
-  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
+  /* Cards fade in with a slight stagger; --i is set per card from JS. */
+  animation: card-in 0.4s var(--ease) both;
+  animation-delay: min(calc(var(--i, 0) * 30ms), 300ms);
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
 }
 
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--border-strong);
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  box-shadow: var(--shadow-md), 0 10px 30px color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
 .card:active {
-  transform: translateY(0);
+  transform: translateY(-1px);
 }
 
 .card--featured {
@@ -664,23 +737,30 @@ a:hover {
   font-weight: 600;
   color: var(--text);
   cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s var(--ease), box-shadow 0.15s;
 }
 
 .btn:hover {
   background: var(--bg-hover);
   text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .btn--primary {
-  background: var(--text);
-  border-color: var(--text);
-  color: var(--bg);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border-color: transparent;
+  color: var(--accent-text);
 }
 
 .btn--primary:hover {
-  background: var(--text);
-  opacity: 0.88;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  filter: brightness(1.06);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
 .showall {
@@ -696,8 +776,9 @@ a:hover {
   inset: 0;
   z-index: 50;
   background: var(--scrim);
-  backdrop-filter: blur(2px);
-  animation: fade 0.16s ease-out;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  animation: fade 0.25s ease-out;
 }
 
 @keyframes fade {
@@ -718,12 +799,12 @@ a:hover {
   background: var(--bg-panel);
   border-left: 1px solid var(--border);
   box-shadow: var(--shadow-lg);
-  animation: slide 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+  animation: slide 0.32s var(--ease-snap);
 }
 
 @keyframes slide {
   from {
-    transform: translateX(24px);
+    transform: translateX(48px);
     opacity: 0;
   }
 }
@@ -739,7 +820,7 @@ a:hover {
 
   @keyframes slide {
     from {
-      transform: translateY(24px);
+      transform: translateY(48px);
       opacity: 0;
     }
   }
@@ -933,13 +1014,13 @@ a:hover {
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
-  animation: pop 0.15s ease-out;
+  animation: pop 0.22s var(--ease-snap);
 }
 
 @keyframes pop {
   from {
     opacity: 0;
-    transform: translateX(-50%) scale(0.97);
+    transform: translateX(-50%) translateY(-8px) scale(0.97);
   }
 }
 
@@ -985,6 +1066,7 @@ a:hover {
   border-radius: var(--radius-sm);
   cursor: pointer;
   text-align: left;
+  transition: background 0.1s;
 }
 
 .palette__item[data-active='true'] {
@@ -1083,6 +1165,12 @@ a:hover {
   border: 1px solid var(--border);
   border-radius: 10px;
   box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.bar__row:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
 }
 
 .bar__meta {
@@ -1129,7 +1217,15 @@ a:hover {
   height: 100%;
   border-radius: 999px;
   background: hsl(var(--hue) 65% 55%);
-  transition: width 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+  transition: width 0.5s var(--ease-snap);
+  /* Grows from zero to its inline width when the pane appears. */
+  animation: grow-x 0.7s var(--ease) both;
+}
+
+@keyframes grow-x {
+  from {
+    width: 0;
+  }
 }
 
 .bar__n {
@@ -1157,6 +1253,13 @@ a:hover {
   border: 1px solid var(--border);
   border-radius: 10px;
   box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
+}
+
+.domain-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .domain-card__name {
@@ -1198,11 +1301,14 @@ a:hover {
   font-size: 12px;
   color: var(--text-muted);
   cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s, transform 0.15s var(--ease);
 }
 
 .cloud__tag:hover {
-  border-color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  background: var(--accent-soft);
   color: var(--text);
+  transform: translateY(-1px);
 }
 
 .cloud__tag b {
@@ -1255,6 +1361,13 @@ a:hover {
   background: var(--bg-panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
+}
+
+.infocard:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .infocard h3 {
@@ -1384,7 +1497,7 @@ a:hover {
 .input:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
 .input::placeholder {
@@ -1419,17 +1532,19 @@ a:hover {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   cursor: pointer;
-  transition: border-color 0.12s, background 0.12s, transform 0.12s;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s var(--ease), box-shadow 0.15s;
 }
 
 .pick:hover {
   border-color: var(--border-strong);
   transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 .pick[aria-pressed='true'] {
   border-color: var(--accent);
   background: var(--accent-soft);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
 .pick__box {
@@ -1523,13 +1638,13 @@ a:hover {
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
-  animation: modal-in 0.18s cubic-bezier(0.32, 0.72, 0, 1);
+  animation: modal-in 0.28s var(--ease-snap);
 }
 
 @keyframes modal-in {
   from {
     opacity: 0;
-    transform: translate(-50%, calc(-50% + 10px)) scale(0.98);
+    transform: translate(-50%, calc(-50% + 16px)) scale(0.97);
   }
 }
 
@@ -1631,22 +1746,111 @@ a:hover {
   font-size: 12px;
 }
 
-/* Searchable area list */
+/* Searchable area list. The search starts as a single icon over the list and
+   expands only when needed, leaving the default form pleasantly compact. */
 
-.search--sm {
-  flex: none;
+.picker {
+  position: relative;
   min-width: 0;
-  margin-bottom: 6px;
 }
 
-.search--sm input {
+.picker__search {
+  position: relative;
+  z-index: 2;
+  height: 0;
+  transition: height 0.28s var(--ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.picker--searching .picker__search {
+  height: 36px;
+}
+
+.picker__searchbox {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 26px;
+  height: 26px;
+  overflow: hidden;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  box-shadow: var(--shadow-sm);
+  transition:
+    top 0.28s var(--ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    right 0.28s var(--ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    width 0.32s var(--ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    height 0.28s var(--ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color 0.16s,
+    box-shadow 0.16s;
+}
+
+.picker--searching .picker__searchbox {
+  top: 0;
+  right: 0;
+  width: 100%;
   height: 30px;
-  padding: 0 10px 0 30px;
-  font-size: 13px;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
-.search--sm .search__icon {
-  left: 9px;
+.picker__searchbox input {
+  width: 100%;
+  height: 100%;
+  padding: 0 10px 0 31px;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.14s ease 0s;
+}
+
+.picker--searching .picker__searchbox input {
+  opacity: 1;
+  pointer-events: auto;
+  transition-delay: 0.1s;
+}
+
+.picker__searchbox input::placeholder {
+  color: var(--text-faint);
+}
+
+.picker__searchbox input::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
+.picker__search-toggle {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 25px;
+  height: 25px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.14s, background 0.14s;
+}
+
+.picker__search-toggle:hover {
+  color: var(--accent);
+  background: var(--bg-hover);
+}
+
+.picker__search-toggle svg {
+  width: 14px;
+  height: 14px;
+}
+
+.picker:not(.picker--searching) .arealist {
+  padding-right: 34px;
 }
 
 .arealist {
@@ -1678,6 +1882,7 @@ a:hover {
   border: 1px solid transparent;
   border-radius: 6px;
   cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
 
 .areaitem:hover {
@@ -1802,7 +2007,7 @@ textarea.input--sm {
   @keyframes modal-in {
     from {
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(16px);
     }
   }
 
@@ -1866,6 +2071,17 @@ textarea.input--sm {
 
 .dot--live {
   background: #2ea043;
+  animation: ping 2.4s var(--ease) infinite;
+}
+
+@keyframes ping {
+  0% {
+    box-shadow: 0 0 0 0 rgba(46, 160, 67, 0.45);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 5px transparent;
+  }
 }
 
 .dot--snapshot {

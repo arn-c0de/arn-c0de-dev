@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { asset } from '@/lib/basePath'
 import { loadProjects, snapshotProjects } from '@/lib/github'
 import type { DataSource, Project } from '@/lib/types'
@@ -30,6 +30,25 @@ export default function AppShell() {
   const [source, setSource] = useState<DataSource>('snapshot')
   const [query, setQuery] = useState('')
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const tabsRef = useRef<HTMLElement>(null)
+  const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null)
+
+  // The active-tab underline is one shared element that glides between tabs,
+  // so its position has to be measured from the DOM.
+  useLayoutEffect(() => {
+    const nav = tabsRef.current
+    if (!nav) return
+    const measure = () => {
+      const active = nav.querySelector<HTMLElement>('[aria-selected="true"]')
+      if (!active) return
+      setIndicator({ left: active.offsetLeft + 10, width: active.offsetWidth - 20 })
+    }
+    measure()
+    // Font loading and viewport changes both shift tab widths.
+    document.fonts?.ready.then(measure)
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [tab, projects.length])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -143,7 +162,14 @@ export default function AppShell() {
           <ThemeToggle />
         </div>
 
-        <nav className="tabs" role="tablist" aria-label="Sections">
+        <nav className="tabs" role="tablist" aria-label="Sections" ref={tabsRef}>
+          {indicator && (
+            <span
+              className="tabs__indicator"
+              aria-hidden
+              style={{ width: indicator.width, transform: `translateX(${indicator.left}px)` }}
+            />
+          )}
           {TABS.map((t) => (
             <button
               key={t}

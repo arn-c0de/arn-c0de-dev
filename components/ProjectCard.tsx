@@ -10,11 +10,14 @@ export default function ProjectCard({
   project,
   onOpen,
   showFeaturedBadge = false,
+  index = 0,
 }: {
   project: Project
   onOpen: (name: string) => void
   /** Only meaningful when the grid mixes featured and non-featured projects. */
   showFeaturedBadge?: boolean
+  /** Position in the grid; drives the staggered entrance animation. */
+  index?: number
 }) {
   const extra = project.topics.length - MAX_TAGS
   const badge = showFeaturedBadge && project.featured
@@ -23,6 +26,7 @@ export default function ProjectCard({
     <button
       type="button"
       className={`card${badge ? ' card--featured' : ''}`}
+      style={{ '--i': index } as React.CSSProperties}
       onClick={() => onOpen(project.name)}
       aria-label={`Open details for ${project.title}`}
     >
