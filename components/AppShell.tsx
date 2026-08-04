@@ -1,0 +1,208 @@
+'use client'
+
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { asset } from '@/lib/basePath'
+import { loadProjects, snapshotProjects } from '@/lib/github'
+import type { DataSource, Project } from '@/lib/types'
+import { TABS, useAppState, type Tab } from '@/lib/useAppState'
+import AboutPane from './AboutPane'
+import CommandPalette from './CommandPalette'
+import ContactPane from './ContactPane'
+import ProjectPanel from './ProjectPanel'
+import ProjectsPane from './ProjectsPane'
+import StackPane from './StackPane'
+import ThemeToggle from './ThemeToggle'
+import { GitHubIcon, SearchIcon } from './Icons'
+
+const TAB_LABELS: Record<Tab, string> = {
+  projects: 'Projects',
+  stack: 'Stack',
+  about: 'About',
+  contact: 'Contact',
+}
+
+export default function AppShell() {
+  const [{ tab, project: openProject }, navigate] = useAppState()
+  // Start from the committed snapshot so the first paint already has content,
+  // then swap in live data when the API answers.
+  const [projects, setProjects] = useState<Project[]>(snapshotProjects)
+  const [source, setSource] = useState<DataSource>('snapshot')
+  const [query, setQuery] = useState('')
+  const [paletteOpen, setPaletteOpen] = useState(false)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    loadProjects(controller.signal).then((result) => {
+      if (controller.signal.aborted || result.source !== 'live') return
+      setProjects(result.projects)
+      setSource('live')
+    })
+    return () => controller.abort()
+  }, [])
+
+  // Offline shell. Registered after load so it never competes with first paint.
+  useEffect(() => {
+    if (!('serviceWorker' in navigator) || location.protocol === 'http:') return
+    const register = () =>
+      navigator.serviceWorker
+        .register(asset('/sw.js'), { scope: asset('/') })
+        .catch(() => {})
+    if (document.readyState === 'complete') register()
+    else {
+      window.addEventListener('load', register, { once: true })
+      return () => window.removeEventListener('load', register)
+    }
+  }, [])
+
+  // ⌘K / Ctrl-K anywhere, and "/" when not already typing in a field.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const typing =
+        e.target instanceof HTMLElement &&
+        ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)
+      if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        setPaletteOpen((open) => !open)
+      } else if (e.key === '/' && !typing && !paletteOpen) {
+        e.preventDefault()
+        setPaletteOpen(true)
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [paletteOpen])
+
+  const selected = useMemo(
+    () => projects.find((p) => p.name === openProject) ?? null,
+    [projects, openProject],
+  )
+
+  const openDetail = useCallback((name: string) => navigate({ tab: 'projects', project: name }), [navigate])
+  const closeDetail = useCallback(() => navigate({ project: null }), [navigate])
+
+  const showTopic = useCallback(
+    (topic: string) => {
+      setQuery(topic)
+      navigate({ tab: 'projects', project: null })
+    },
+    [navigate],
+  )
+
+  return (
+    <div className="shell">
+      <header className="topbar">
+        <div className="topbar__row">
+          <button type="button" className="brand" onClick={() => navigate({ tab: 'projects', project: null })}>
+            <span className="brand__mark">a</span>
+            arn-c0de
+          </button>
+
+          <span className="topbar__spacer" />
+
+          <button
+            type="button"
+            className="iconbtn"
+            onClick={() => setPaletteOpen(true)}
+            aria-label="Open command palette"
+          >
+            <SearchIcon />
+            <span className="kbd" style={{ border: 0, background: 'none', padding: 0 }}>
+              ⌘K
+            </span>
+          </button>
+
+          <a
+            className="iconbtn"
+            href="https://github.com/arn-c0de"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub profile"
+          >
+            <GitHubIcon size={15} />
+          </a>
+
+          <ThemeToggle />
+        </div>
+
+        <nav className="tabs" role="tablist" aria-label="Sections">
+          {TABS.map((t) => (
+            <button
+              key={t}
+              type="button"
+              className="tab"
+              role="tab"
+              aria-selected={tab === t}
+              onClick={() => navigate({ tab: t, project: null })}
+            >
+              {TAB_LABELS[t]}
+              {t === 'projects' && <span className="tab__count">{projects.length}</span>}
+            </button>
+          ))}
+        </nav>
+      </header>
+
+      <main className="main">
+        {tab === 'projects' && (
+          <ProjectsPane
+            projects={projects}
+            query={query}
+            onQueryChange={setQuery}
+            onOpen={openDetail}
+          />
+        )}
+        {tab === 'stack' && <StackPane projects={projects} onTopicSelect={showTopic} />}
+        {tab === 'about' && <AboutPane projects={projects} />}
+        {tab === 'contact' && <ContactPane />}
+      </main>
+
+      <footer className="footer">
+        <div className="footer__row">
+          <span>
+            <span className={`dot dot--${source}`} />
+            {source === 'live' ? 'Live from the GitHub API' : 'Showing committed snapshot'}
+          </span>
+          <span>No tracking, no cookies, no analytics.</span>
+          <span style={{ marginLeft: 'auto' }}>
+            <a href="https://github.com/arn-c0de" target="_blank" rel="noopener noreferrer">
+              github.com/arn-c0de
+            </a>
+          </span>
+        </div>
+
+        <details className="privacy">
+          <summary>Privacy</summary>
+          <div className="privacy__body">
+            <p>
+              This site sets no cookies, stores nothing about you beyond your chosen colour theme
+              in your own browser, and runs no analytics or tracking of any kind. Fonts, icons and
+              styles are served from this domain — there is no CDN and no third-party script.
+            </p>
+            <p>
+              The one request made automatically is to <span className="mono">api.github.com</span>{' '}
+              to read the public repository list. Opening a project additionally requests that
+              repository&apos;s readme. Images embedded in readmes are hosted by GitHub and stay
+              blocked until you press <em>Load images</em>.
+            </p>
+            <p>
+              Hosting is GitHub Pages. Like any web server, GitHub receives your IP address and
+              request metadata when the page is delivered; that happens on their infrastructure
+              under their privacy policy and is outside my control. I neither receive nor keep
+              those logs.
+            </p>
+          </div>
+        </details>
+      </footer>
+
+      {selected && <ProjectPanel project={selected} onClose={closeDetail} />}
+
+      {paletteOpen && (
+        <CommandPalette
+          projects={projects}
+          onClose={() => setPaletteOpen(false)}
+          onNavigate={(t) => navigate({ tab: t, project: null })}
+          onOpenProject={openDetail}
+        />
+      )}
+    </div>
+  )
+}

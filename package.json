@@ -1,0 +1,26 @@
+{
+  "name": "arn-c0de-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Project console for github.com/arn-c0de",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "preview": "PAGES_BASE_PATH= next build && npx serve out",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "^15.5.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@fontsource-variable/jetbrains-mono": "^5.2.0",
+    "@fontsource-variable/manrope": "^5.2.0",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "typescript": "^5.7.0"
+  }
+}

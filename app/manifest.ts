@@ -1,0 +1,24 @@
+import type { MetadataRoute } from 'next'
+import { asset } from '@/lib/basePath'
+
+// Generated rather than kept as a static file so start_url, scope and the icon
+// paths pick up the base path automatically.
+export const dynamic = 'force-static'
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: 'arn-c0de — project console',
+    short_name: 'arn-c0de',
+    description:
+      'Embedded systems, AI agents and network security. Open source projects by arn-c0de.',
+    start_url: asset('/'),
+    scope: asset('/'),
+    display: 'standalone',
+    background_color: '#0a0c10',
+    theme_color: '#0a0c10',
+    icons: [
+      { src: asset('/icon.svg'), sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+      { src: asset('/icon-maskable.svg'), sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' },
+    ],
+  }
+}
