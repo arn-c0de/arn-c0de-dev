@@ -9,7 +9,8 @@ export const metadata: Metadata = {
   description:
     'Embedded systems, AI agents and network security. Open source projects by arn-c0de.',
   manifest: asset('/manifest.webmanifest'),
-  icons: { icon: asset('/icon.svg'), apple: asset('/icon.svg') },
+  // Favicon and apple-touch icon come from app/icon.png and app/apple-icon.png
+  // via Next's file convention, which handles the base path itself.
   openGraph: {
     title: 'arn-c0de — project console',
     description: 'Embedded systems, AI agents and network security.',

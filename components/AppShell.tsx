@@ -93,7 +93,8 @@ export default function AppShell() {
       <header className="topbar">
         <div className="topbar__row">
           <button type="button" className="brand" onClick={() => navigate({ tab: 'projects', project: null })}>
-            <span className="brand__mark">a</span>
+            {/* Served from this domain, not from GitHub's avatar CDN. */}
+            <img className="brand__mark" src={asset('/avatar.jpg')} alt="" width={26} height={26} />
             arn-c0de
           </button>
 
@@ -173,9 +174,10 @@ export default function AppShell() {
           <summary>Privacy</summary>
           <div className="privacy__body">
             <p>
-              This site sets no cookies, stores nothing about you beyond your chosen colour theme
-              in your own browser, and runs no analytics or tracking of any kind. Fonts, icons and
-              styles are served from this domain — there is no CDN and no third-party script.
+              This site sets no cookies and runs no analytics or tracking of any kind. Fonts,
+              icons and styles are served from this domain — there is no CDN and no third-party
+              script. The only things kept in your browser are your chosen colour theme and an
+              offline copy of the page assets, both of which clearing site data removes.
             </p>
             <p>
               The one request made automatically is to <span className="mono">api.github.com</span>{' '}

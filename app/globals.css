@@ -196,14 +196,12 @@ a:hover {
 .brand__mark {
   width: 26px;
   height: 26px;
-  border-radius: 7px;
-  background: var(--text);
-  color: var(--bg);
-  display: grid;
-  place-items: center;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 700;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  background: var(--bg-inset);
 }
 
 .topbar__spacer {

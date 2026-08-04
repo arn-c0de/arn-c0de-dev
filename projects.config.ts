@@ -71,7 +71,9 @@ const config: SiteConfig = {
 
   showForks: false,
   showArchived: false,
-  showAllByDefault: false,
+  // Every public repo is on the page from the start; `featured` now only
+  // controls which ones lead the grid, not which ones exist.
+  showAllByDefault: true,
 
   overrides: {
     Crawllama: {
