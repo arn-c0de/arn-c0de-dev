@@ -66,8 +66,8 @@ export default function ProjectsPane({
       <div className="pane__head">
         <h1 className="pane__title">Projects</h1>
         <p className="pane__lede">
-          Open source work across embedded systems, AI agents and network security. Pulled live
-          from GitHub — select a project for readme, stats and links.
+          Things I have built around embedded systems, local AI and network security. The list
+          comes straight from GitHub — pick a project to see the details, readme and links.
         </p>
       </div>
 

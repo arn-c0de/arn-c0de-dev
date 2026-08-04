@@ -42,16 +42,15 @@ export default function ContactPane() {
   return (
     <div className="pane">
       <div className="pane__head">
-        <h1 className="pane__title">Secure contact</h1>
+        <h1 className="pane__title">Get in touch</h1>
         <p className="pane__lede">
-          If you need to contact me about sensitive topics, you are welcome to use secure or
-          confidential channels — encrypted email using the PGP public key below, or private chat
-          via SimpleX where appropriate.
+          Need to share something sensitive? You can reach me through SimpleX or send an encrypted
+          email with the PGP key below.
         </p>
       </div>
 
       <section className="section">
-        <h2 className="section__title">This channel is intended for</h2>
+        <h2 className="section__title">Good reasons to reach out</h2>
         <div className="cloud">
           {SUITABLE_FOR.map((item) => (
             <span key={item} className="cloud__tag" style={{ cursor: 'default' }}>
@@ -67,7 +66,7 @@ export default function ContactPane() {
           <div className="infocard">
             <h3>SimpleX Chat</h3>
             <p style={{ marginBottom: 12 }}>
-              For confidential first contact or lower-friction coordination.
+              The easiest option for a private first message or a quick back-and-forth.
             </p>
             <div className="panel__actions">
               <a className="btn btn--primary" href={SIMPLEX_LINK} target="_blank" rel="noopener noreferrer">
@@ -80,8 +79,8 @@ export default function ContactPane() {
           <div className="infocard">
             <h3>Email</h3>
             <p style={{ marginBottom: 12 }}>
-              <span className="mono">{EMAIL}</span> — encrypted email is preferred for messages
-              containing highly sensitive technical details. Please use the PGP key below.
+              <span className="mono">{EMAIL}</span> — for sensitive technical details, please
+              encrypt your message with the PGP key below.
             </p>
             <div className="panel__actions">
               <a className="btn btn--primary" href={`mailto:${EMAIL}`}>
@@ -102,9 +101,8 @@ export default function ContactPane() {
         <h2 className="section__title">PGP public key</h2>
 
         <div className="callout callout--warn">
-          <strong>Verify before you trust this page.</strong> Confirm the fingerprint through a
-          second, independent channel before sending anything sensitive — do not rely on this page
-          alone.
+          <strong>Check before you trust.</strong> Confirm the fingerprint through a second,
+          independent channel before sending anything sensitive. This page alone is not enough.
         </div>
 
         <dl className="deflist" style={{ marginBottom: 16 }}>
@@ -133,12 +131,11 @@ export default function ContactPane() {
       </section>
 
       <section className="section">
-        <h2 className="section__title">Note</h2>
+        <h2 className="section__title">Before you send</h2>
         <div className="callout">
-          If your message contains sensitive technical details, affected systems, internal material,
-          or information that should not be sent in plain text, please use an appropriate secure
-          channel. Encrypted email should be preferred for the most sensitive reports and
-          disclosures.
+          If your message includes affected systems, internal material or anything else that should
+          not travel as plain text, use one of the secure options above. For detailed reports and
+          disclosures, encrypted email is usually the best fit.
         </div>
       </section>
     </div>

@@ -10,6 +10,7 @@ import CommandPalette from './CommandPalette'
 import ContactPane from './ContactPane'
 import ProjectPanel from './ProjectPanel'
 import ProjectsPane from './ProjectsPane'
+import RequestPane from './RequestPane'
 import StackPane from './StackPane'
 import ThemeToggle from './ThemeToggle'
 import { GitHubIcon, SearchIcon } from './Icons'
@@ -18,11 +19,12 @@ const TAB_LABELS: Record<Tab, string> = {
   projects: 'Projects',
   stack: 'Stack',
   about: 'About',
+  request: 'Request',
   contact: 'Contact',
 }
 
 export default function AppShell() {
-  const [{ tab, project: openProject }, navigate] = useAppState()
+  const [{ tab, project: openProject, requestFor }, navigate] = useAppState()
   // Start from the committed snapshot so the first paint already has content,
   // then swap in live data when the API answers.
   const [projects, setProjects] = useState<Project[]>(snapshotProjects)
@@ -79,6 +81,18 @@ export default function AppShell() {
 
   const openDetail = useCallback((name: string) => navigate({ tab: 'projects', project: name }), [navigate])
   const closeDetail = useCallback(() => navigate({ project: null }), [navigate])
+
+  // From the detail panel: close it, switch to the request tab, keep the
+  // project attached (and do not add it twice if it is already there).
+  const startRequest = useCallback(
+    (repo: string) =>
+      navigate({
+        tab: 'request',
+        project: null,
+        requestFor: requestFor.includes(repo) ? requestFor : [...requestFor, repo],
+      }),
+    [navigate, requestFor],
+  )
 
   const showTopic = useCallback(
     (topic: string) => {
@@ -153,6 +167,13 @@ export default function AppShell() {
         )}
         {tab === 'stack' && <StackPane projects={projects} onTopicSelect={showTopic} />}
         {tab === 'about' && <AboutPane projects={projects} />}
+        {tab === 'request' && (
+          <RequestPane
+            projects={projects}
+            selected={requestFor}
+            onSelectedChange={(names) => navigate({ requestFor: names })}
+          />
+        )}
         {tab === 'contact' && <ContactPane />}
       </main>
 
@@ -195,7 +216,9 @@ export default function AppShell() {
         </details>
       </footer>
 
-      {selected && <ProjectPanel project={selected} onClose={closeDetail} />}
+      {selected && (
+        <ProjectPanel project={selected} onClose={closeDetail} onRequest={startRequest} />
+      )}
 
       {paletteOpen && (
         <CommandPalette

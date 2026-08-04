@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { loadReadme } from '@/lib/github'
 import { formatMonth, formatRelative, languageHue } from '@/lib/format'
 import type { Project } from '@/lib/types'
-import { CloseIcon, GitHubIcon, LinkIcon } from './Icons'
+import { CloseIcon, GitHubIcon, LinkIcon, MailIcon } from './Icons'
 
 /**
  * GitHub already sanitises the HTML it renders, but this runs it through the
@@ -68,9 +68,12 @@ function sanitise(html: string, repo: string): { withImages: string; withoutImag
 export default function ProjectPanel({
   project,
   onClose,
+  onRequest,
 }: {
   project: Project
   onClose: () => void
+  /** Opens the request tab with this project already attached. */
+  onRequest: (name: string) => void
 }) {
   const [readme, setReadme] = useState<{ withImages: string; withoutImages: string; images: number } | null>(null)
   const [readmeState, setReadmeState] = useState<'loading' | 'ready' | 'missing'>('loading')
@@ -152,10 +155,14 @@ export default function ProjectPanel({
 
           <section className="panel__section">
             <div className="panel__actions">
+              <button type="button" className="btn btn--primary" onClick={() => onRequest(project.name)}>
+                <MailIcon />
+                Ask about this
+              </button>
               {links.map((link) => (
                 <a
                   key={link.href}
-                  className={`btn${link.href === project.html_url ? ' btn--primary' : ''}`}
+                  className="btn"
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"

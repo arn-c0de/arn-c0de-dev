@@ -5,20 +5,20 @@ import { GitHubIcon } from './Icons'
 
 const PRINCIPLES = [
   {
-    title: 'Local first',
-    body: 'Language models, capture tooling and key management run on the machine in front of you. No account, no upload, no third party in the loop.',
+    title: 'Local by default',
+    body: 'If something can run on your machine, it should. That means fewer accounts, fewer uploads and less data leaving your hands.',
   },
   {
-    title: 'Fail closed',
-    body: 'Security tooling aborts instead of degrading quietly. A verification step that cannot prove its guarantee stops the operation rather than assuming the best.',
+    title: 'Security that stays honest',
+    body: 'When a security check cannot do its job, the tool stops and tells you. Quietly pretending everything is fine is never the fallback.',
   },
   {
-    title: 'Hardware to interface',
-    body: 'Projects usually span the whole path: firmware on the microcontroller, the transport in between, and a desktop or mobile client that makes the data readable.',
+    title: 'The whole path',
+    body: 'I like building things end to end: from firmware on a microcontroller to the connection in between and the app that makes it useful.',
   },
   {
-    title: 'Readable over clever',
-    body: 'Small dependency trees, documented setup, licence stated up front. Every repository should be auditable by the person who has to trust it.',
+    title: 'Clear beats clever',
+    body: 'I would rather ship readable code, a short dependency list and setup notes that actually help. If you need to trust a tool, you should be able to understand it.',
   },
 ]
 
@@ -38,25 +38,23 @@ export default function AboutPane({ projects }: { projects: Project[] }) {
 
       <div className="prose" style={{ marginBottom: 32 }}>
         <p>
-          I build <strong>embedded systems, AI agents and network security tooling</strong> — ESP32
-          and Arduino firmware, retrieval-augmented assistants that run against local models, live
-          traffic and threat analysis, and Android apps in Kotlin.
+          I like building things close to the hardware — and tools that make complicated systems
+          easier to understand. Right now, that means <strong>ESP32 and Arduino firmware, local AI
+          assistants, network and security tooling, and Android apps in Kotlin</strong>.
         </p>
         <p>
-          Most of it starts as a problem I actually had: a mesh link that needed encryption, a
-          research question no search engine answered well, a server whose SSH logins I wanted to
-          see in real time. The projects stay published because the next person with that problem
-          should not have to start from zero.
+          Most projects start with something I wanted for myself: an encrypted mesh link, a better
+          way to dig through research, or a live view of SSH attempts on a server. If the result
+          might save someone else a few evenings, I clean it up and put it on GitHub.
         </p>
         <p>
-          Everything on this page is public and open for inspection. Where a project touches
-          credentials, capture data or personal information, it is built to keep that data on the
-          device it was created on.
+          The code is public, the setup is documented, and sensitive data stays where it belongs:
+          on your device. No account or cloud detour unless a project genuinely needs one.
         </p>
       </div>
 
       <section className="section">
-        <h2 className="section__title">How I work</h2>
+        <h2 className="section__title">A few things I care about</h2>
         <div className="cards">
           {PRINCIPLES.map((p) => (
             <div key={p.title} className="infocard">
@@ -68,7 +66,7 @@ export default function AboutPane({ projects }: { projects: Project[] }) {
       </section>
 
       <section className="section">
-        <h2 className="section__title">Working languages</h2>
+        <h2 className="section__title">Languages I build with</h2>
         <div className="cloud">
           {languages.map((l) => (
             <span key={l} className="cloud__tag" style={{ cursor: 'default' }}>

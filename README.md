@@ -101,6 +101,26 @@ gh workflow run deploy.yml --ref main
 
 The repository must be public for Pages to publish on a free account.
 
+## The request tab
+
+Visitors assemble an inquiry — type, budget, timeline, message, and any projects they picked via
+*Ask about this* in a project panel — and get a finished email they only have to send. There is no
+backend: the draft is built in the browser and handed to their own mail client through a `mailto:`
+link, with *Copy draft* as the fallback when no client is configured.
+
+Everything configurable lives in `lib/request.ts`:
+
+```ts
+INQUIRY_EMAIL   // where requests go — kept separate from the secure-contact address
+INQUIRY_TYPES   // the "type of request" options
+BUDGETS         // budget ranges
+TIMELINES       // timeline options
+MAILTO_LIMIT    // above this the UI steers people to Copy draft instead
+```
+
+`buildBody()` in the same file is the email template. Request state lives in the URL
+(`?tab=request&for=Crawllama,GPG-Meister`), so a prepared request is a shareable link.
+
 ## Contact and keys
 
 `public/arn-c0de.asc` is the PGP public key rendered on the contact tab. Its fingerprint is

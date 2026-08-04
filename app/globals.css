@@ -1258,6 +1258,121 @@ a:hover {
   margin-bottom: 8px;
 }
 
+/* ── Request form ───────────────────────────────────────────────────────── */
+
+.form {
+  max-width: 760px;
+}
+
+.form__section {
+  margin-bottom: 28px;
+}
+
+.form__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.field__label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.input {
+  width: 100%;
+  height: 38px;
+  padding: 0 11px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+
+.input--area {
+  height: auto;
+  padding: 10px 11px;
+  line-height: 1.55;
+  resize: vertical;
+  min-height: 120px;
+  font-family: inherit;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.input::placeholder {
+  color: var(--text-faint);
+}
+
+.select--wide {
+  width: 100%;
+  background-position: calc(100% - 15px) 17px, calc(100% - 11px) 17px;
+}
+
+.btn--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.draft {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-panel);
+}
+
+.draft__head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-inset);
+  font-size: 13px;
+}
+
+.draft__key {
+  display: inline-block;
+  width: 62px;
+  color: var(--text-faint);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.draft__body {
+  margin: 0;
+  padding: 14px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--text-muted);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.form__note {
+  margin: 14px 0 0;
+  font-size: 12.5px;
+  color: var(--text-faint);
+  max-width: 68ch;
+}
+
 /* ── Footer ─────────────────────────────────────────────────────────────── */
 
 .footer {

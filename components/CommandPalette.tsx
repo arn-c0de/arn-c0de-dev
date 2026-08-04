@@ -36,6 +36,7 @@ export default function CommandPalette({
       { tab: 'projects', label: 'Projects', hint: 'Browse the repository grid' },
       { tab: 'stack', label: 'Stack', hint: 'Languages, domains and topics' },
       { tab: 'about', label: 'About', hint: 'Focus areas and working principles' },
+      { tab: 'request', label: 'Request', hint: 'Build an inquiry email to send' },
       { tab: 'contact', label: 'Contact', hint: 'SimpleX, email and PGP key' },
     ]
 

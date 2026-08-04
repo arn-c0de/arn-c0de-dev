@@ -45,8 +45,8 @@ export default function StackPane({
       <div className="pane__head">
         <h1 className="pane__title">Stack</h1>
         <p className="pane__lede">
-          What the repositories actually contain, counted from the live GitHub data rather than
-          claimed from memory.
+          A quick look at what I actually use — pulled from the repositories instead of a list I
+          wrote once and forgot to update.
         </p>
       </div>
 

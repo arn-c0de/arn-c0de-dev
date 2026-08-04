@@ -98,3 +98,12 @@ export function CopyIcon() {
     </svg>
   )
 }
+
+export function MailIcon() {
+  return (
+    <svg {...base} width={14} height={14}>
+      <rect x="1.5" y="3.5" width="13" height="9" rx="1.8" />
+      <path d="m2 4.5 6 4 6-4" />
+    </svg>
+  )
+}

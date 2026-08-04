@@ -7,13 +7,13 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'arn-c0de — project console',
   description:
-    'Embedded systems, AI agents and network security. Open source projects by arn-c0de.',
+    'Open-source projects around embedded systems, local AI and network security by arn-c0de.',
   manifest: asset('/manifest.webmanifest'),
   // Favicon and apple-touch icon come from app/icon.png and app/apple-icon.png
   // via Next's file convention, which handles the base path itself.
   openGraph: {
     title: 'arn-c0de — project console',
-    description: 'Embedded systems, AI agents and network security.',
+    description: 'Open-source projects around embedded systems, local AI and network security.',
     type: 'website',
   },
   robots: { index: true, follow: true },
