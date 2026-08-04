@@ -257,8 +257,14 @@ export default function RequestModal({
             )}
           </span>
           <div className="modal__actions">
-            <button type="button" className="btn" onClick={copyDraft}>
-              {copied ? <CheckIcon /> : <CopyIcon />}
+            <button
+              type="button"
+              className={`btn${copied ? ' btn--copied' : ''}`}
+              onClick={copyDraft}
+            >
+              <span className="btn__icon" key={copied ? 'done' : 'idle'}>
+                {copied ? <CheckIcon /> : <CopyIcon />}
+              </span>
               {copied ? 'Copied' : 'Copy draft'}
             </button>
             <a

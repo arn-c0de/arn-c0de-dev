@@ -1722,18 +1722,17 @@ a:hover {
 .bar__fill {
   /* A span is inline by default, where width and height do not apply. */
   display: block;
+  /* The share is a custom property so the reveal rules further down can hold
+     the bar at zero until its row is on screen; without JS it lands here. */
+  width: var(--w, 0);
   height: 100%;
   border-radius: 999px;
   background: hsl(var(--hue) 65% 55%);
-  transition: width 0.5s var(--ease-snap);
-  /* Grows from zero to its inline width when the pane appears. */
-  animation: grow-x 0.7s var(--ease) both;
+  transition: width 0.6s var(--ease-snap), box-shadow 0.2s var(--ease);
 }
 
-@keyframes grow-x {
-  from {
-    width: 0;
-  }
+.bar__row:hover .bar__fill {
+  box-shadow: 0 0 10px hsl(var(--hue) 65% 55% / 0.45);
 }
 
 .bar__n {
@@ -3066,4 +3065,266 @@ textarea.input--sm {
   height: 32px;
   padding: 0 11px;
   font-size: 13.5px;
+}
+
+/* ── Motion ─────────────────────────────────────────────────────────────── */
+
+/* Everything below is additive polish: with JavaScript off, `data-reveal` on
+   the root is never set and the page renders in its final state. The global
+   reduced-motion rule near the top flattens all of it to a single frame. */
+
+:root {
+  --scroll-progress: 0;
+}
+
+/* Scroll reveal. Elements marked `data-reveal` wait at zero opacity until the
+   observer in lib/useMotion.ts sees them, then run one entrance. Keyframes
+   only declare `from`, so the finished state stays the element's own — hover
+   transforms keep working through the animation's fill. */
+
+:root[data-reveal='on'] [data-reveal]:not(.is-in) {
+  opacity: 0;
+}
+
+:root[data-reveal='on'] [data-reveal].is-in {
+  animation: reveal-in 0.55s var(--ease) both;
+  /* Stagger inside a group, capped so a long list never crawls. */
+  animation-delay: calc(min(var(--i, 0), 7) * 55ms);
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* Cards keep their own slightly tighter entrance; must follow the generic
+   rule above, which it ties with on specificity. */
+:root[data-reveal='on'] .card {
+  animation: none;
+}
+
+:root[data-reveal='on'] .card.is-in {
+  animation: card-in 0.45s var(--ease) both;
+  animation-delay: min(calc(var(--i, 0) * 35ms), 320ms);
+}
+
+/* Language bars run out from zero once their row arrives, one after the next
+   rather than all at once. */
+:root[data-reveal='on'] .bar__row:not(.is-in) .bar__fill {
+  width: 0;
+}
+
+.bar__row.is-in .bar__fill {
+  transition-delay: calc(min(var(--i, 0), 7) * 60ms);
+}
+
+/* Panes slide in from the side the tab sits on, so moving right through the
+   tabs looks like moving right. `clip` rather than `hidden`: it swallows the
+   sideways overshoot on a narrow screen without turning the main column into
+   a scroll container. */
+.main {
+  overflow-x: clip;
+}
+
+.main[data-dir='forward'] .pane {
+  animation-name: pane-forward;
+}
+
+.main[data-dir='back'] .pane {
+  animation-name: pane-back;
+}
+
+@keyframes pane-forward {
+  from {
+    opacity: 0;
+    transform: translate3d(26px, 6px, 0);
+  }
+}
+
+@keyframes pane-back {
+  from {
+    opacity: 0;
+    transform: translate3d(-26px, 6px, 0);
+  }
+}
+
+/* Hero: the avatar lands first, then each line of the introduction. */
+
+.hero__avatar {
+  animation: pop-in 0.5s var(--ease-snap) both;
+}
+
+.hero__text > * {
+  animation: rise 0.5s var(--ease) both;
+}
+
+.hero__text > :nth-child(1) {
+  animation-delay: 0.06s;
+}
+
+.hero__text > :nth-child(2) {
+  animation-delay: 0.12s;
+}
+
+.hero__text > :nth-child(3) {
+  animation-delay: 0.18s;
+}
+
+.hero__text > :nth-child(4) {
+  animation-delay: 0.24s;
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+}
+
+/* Reading progress across the very top of the sticky bar. */
+
+.topbar__progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  transform: scaleX(var(--scroll-progress, 0));
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  pointer-events: none;
+}
+
+/* Once the page has moved, the bar tightens and lifts off the content. */
+
+.topbar__row {
+  transition: height 0.25s var(--ease);
+}
+
+.topbar[data-scrolled='true'] {
+  box-shadow: var(--shadow-sm);
+}
+
+.topbar[data-scrolled='true'] .topbar__row {
+  height: 46px;
+}
+
+.brand__mark {
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease),
+    width 0.25s var(--ease), height 0.25s var(--ease);
+}
+
+.topbar[data-scrolled='true'] .brand__mark {
+  width: 22px;
+  height: 22px;
+}
+
+/* A light that follows the cursor across a card. The coordinates come from
+   the pointer handler in ProjectCard; the layer sits under the text. */
+
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    190px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--accent) 13%, transparent),
+    transparent 72%
+  );
+  transition: opacity 0.3s var(--ease);
+}
+
+.card > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (hover: hover) {
+  .card:hover::after {
+    opacity: 1;
+  }
+}
+
+/* Theme toggle: the icon spins in, and the new palette is wiped over the old
+   one from the button outwards (see ThemeToggle). */
+
+.themeicon {
+  display: inline-flex;
+  line-height: 0;
+  animation: theme-in 0.45s var(--ease) both;
+}
+
+.themeicon__auto {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+@keyframes theme-in {
+  from {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.55);
+  }
+}
+
+/* The default cross-fade would blur the wipe; the clip-path animation the
+   toggle starts is the whole effect. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 0;
+}
+
+::view-transition-new(root) {
+  z-index: 1;
+}
+
+/* The repository count pops when live data lands on a different number. */
+
+.tab__count {
+  display: inline-block;
+  animation: count-in 0.4s var(--ease-snap) both;
+}
+
+@keyframes count-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.7);
+  }
+}
+
+/* Copy buttons: the tick lands rather than swapping in. */
+
+.btn__icon {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.btn--copied {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  color: var(--accent);
+}
+
+.btn--copied .btn__icon {
+  animation: tick-in 0.4s var(--ease-snap) both;
+}
+
+@keyframes tick-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+
+  60% {
+    transform: scale(1.2);
+  }
 }

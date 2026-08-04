@@ -3,6 +3,7 @@
 import { useMemo } from 'react'
 import { languageHue } from '@/lib/format'
 import type { Project } from '@/lib/types'
+import Metric from './Metric'
 import { LanguageIcon } from './Icons'
 
 /**
@@ -51,33 +52,31 @@ export default function StackPane({
         </p>
       </div>
 
-      <div className="metrics">
-        <div className="metric">
-          <div className="metric__v">{projects.length}</div>
-          <div className="metric__k">Projects</div>
-        </div>
-        <div className="metric">
-          <div className="metric__v">{stats.stars}</div>
-          <div className="metric__k">Stars</div>
-        </div>
-        <div className="metric">
-          <div className="metric__v">{stats.languages.length}</div>
-          <div className="metric__k">Languages</div>
-        </div>
-        <div className="metric">
-          <div className="metric__v">{stats.topics.length}</div>
-          <div className="metric__k">Shared topics</div>
-        </div>
+      <div className="metrics" data-reveal>
+        <Metric value={projects.length} label="Projects" />
+        <Metric value={stats.stars} label="Stars" />
+        <Metric value={stats.languages.length} label="Languages" />
+        <Metric value={stats.topics.length} label="Shared topics" />
       </div>
 
       <section className="section">
         <h2 className="section__title">Languages</h2>
         <div className="bars">
-          {stats.languages.map(([name, count]) => (
+          {/* The fill width is a custom property rather than a plain width:
+              the bar sits at zero until its row scrolls into view, then runs
+              out to --w. Without JS the CSS falls straight through to --w. */}
+          {stats.languages.map(([name, count], i) => (
             <div
               key={name}
               className="bar__row"
-              style={{ '--hue': languageHue(name) } as React.CSSProperties}
+              data-reveal
+              style={
+                {
+                  '--hue': languageHue(name),
+                  '--w': `${(count / stats.max) * 100}%`,
+                  '--i': i,
+                } as React.CSSProperties
+              }
             >
               <div className="bar__meta">
                 <span className="bar__name">
@@ -89,10 +88,7 @@ export default function StackPane({
                 </span>
               </div>
               <span className="bar__track">
-                <span
-                  className="bar__fill"
-                  style={{ width: `${(count / stats.max) * 100}%` }}
-                />
+                <span className="bar__fill" />
               </span>
             </div>
           ))}
@@ -102,8 +98,13 @@ export default function StackPane({
       <section className="section">
         <h2 className="section__title">Domains</h2>
         <div className="domain-grid">
-          {stats.categories.map(([name, count]) => (
-            <div key={name} className="domain-card">
+          {stats.categories.map(([name, count], i) => (
+            <div
+              key={name}
+              className="domain-card"
+              data-reveal
+              style={{ '--i': i } as React.CSSProperties}
+            >
               <span className="domain-card__name">{name}</span>
               <span className="domain-card__count" title={`${count} project${count === 1 ? '' : 's'}`}>
                 {count}
@@ -116,11 +117,13 @@ export default function StackPane({
       <section className="section">
         <h2 className="section__title">Topics used more than once</h2>
         <div className="cloud">
-          {stats.topics.map(([topic, count]) => (
+          {stats.topics.map(([topic, count], i) => (
             <button
               key={topic}
               type="button"
               className="cloud__tag"
+              data-reveal
+              style={{ '--i': i } as React.CSSProperties}
               onClick={() => onTopicSelect(topic)}
               title={`Show projects tagged ${topic}`}
             >

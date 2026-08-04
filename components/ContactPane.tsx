@@ -41,8 +41,11 @@ function CopyButton({ value, label }: { value: string; label: string }) {
   }
 
   return (
-    <button type="button" className="btn" onClick={copy}>
-      {copied ? <CheckIcon /> : <CopyIcon />}
+    <button type="button" className={`btn${copied ? ' btn--copied' : ''}`} onClick={copy}>
+      {/* Keyed so the tick mounts fresh and pops rather than swapping in flat. */}
+      <span className="btn__icon" key={copied ? 'done' : 'idle'}>
+        {copied ? <CheckIcon /> : <CopyIcon />}
+      </span>
       {copied ? 'Copied' : label}
     </button>
   )
@@ -63,7 +66,7 @@ export default function ContactPane({ onStartRequest }: { onStartRequest: () => 
       {/* The two channels that actually work lead; Matrix is a footnote until
           it does. */}
       <div className="channels">
-        <article className="channel">
+        <article className="channel" data-reveal>
           <div className="channel__head">
             <h2 className="channel__name">SimpleX Chat</h2>
             <span className="pill">preferred</span>
@@ -85,7 +88,7 @@ export default function ContactPane({ onStartRequest }: { onStartRequest: () => 
           </div>
         </article>
 
-        <article className="channel">
+        <article className="channel" data-reveal style={{ '--i': 1 } as React.CSSProperties}>
           <div className="channel__head">
             <h2 className="channel__name">Email</h2>
             <span className="pill pill--quiet mono">{EMAIL}</span>
@@ -102,7 +105,11 @@ export default function ContactPane({ onStartRequest }: { onStartRequest: () => 
           </div>
         </article>
 
-        <article className="channel channel--muted">
+        <article
+          className="channel channel--muted"
+          data-reveal
+          style={{ '--i': 2 } as React.CSSProperties}
+        >
           <div className="channel__head">
             <h2 className="channel__name">Matrix</h2>
             <span className="pill pill--quiet">unavailable</span>

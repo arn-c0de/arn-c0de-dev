@@ -4,6 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { asset } from '@/lib/basePath'
 import { loadProjects, snapshotProjects } from '@/lib/github'
 import type { DataSource, Project } from '@/lib/types'
+import { useRevealRoot } from '@/lib/useMotion'
 import { TABS, useAppState, type Tab } from '@/lib/useAppState'
 import AboutPane from './AboutPane'
 import ContactPane from './ContactPane'
@@ -33,6 +34,42 @@ export default function AppShell() {
   const [query, setQuery] = useState('')
   const tabsRef = useRef<HTMLElement>(null)
   const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null)
+  const shellRef = useRevealRoot<HTMLDivElement>()
+  const [scrolled, setScrolled] = useState(false)
+
+  // Which way the new pane comes in from: tab order decides, so moving right
+  // through the tabs always feels like moving right.
+  const previousTab = useRef<Tab>(tab)
+  const direction = useRef(1)
+  if (previousTab.current !== tab) {
+    direction.current = TABS.indexOf(tab) > TABS.indexOf(previousTab.current) ? 1 : -1
+    previousTab.current = tab
+  }
+
+  // Reading progress fills the hairline under the topbar, and the bar itself
+  // tightens up once the page has moved. Both are written straight to CSS
+  // custom properties on a frame, so scrolling never re-renders the tree.
+  useEffect(() => {
+    let frame = 0
+    const measure = () => {
+      frame = 0
+      const max = document.documentElement.scrollHeight - window.innerHeight
+      const progress = max > 8 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0
+      document.documentElement.style.setProperty('--scroll-progress', String(progress))
+      setScrolled(window.scrollY > 8)
+    }
+    const onScroll = () => {
+      frame ||= requestAnimationFrame(measure)
+    }
+    measure()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      cancelAnimationFrame(frame)
+    }
+  }, [])
 
   // The active-tab underline is one shared element that glides between tabs,
   // so its position has to be measured from the DOM.
@@ -92,8 +129,8 @@ export default function AppShell() {
   )
 
   return (
-    <div className="shell">
-      <header className="topbar">
+    <div className="shell" ref={shellRef}>
+      <header className="topbar" data-scrolled={scrolled}>
         <div className="topbar__row">
           <button type="button" className="brand" onClick={() => navigate({ tab: 'overview', project: null })}>
             {/* Served from this domain, not from GitHub's avatar CDN. */}
@@ -146,13 +183,22 @@ export default function AppShell() {
               onClick={() => navigate({ tab: t, project: null })}
             >
               {TAB_LABELS[t]}
-              {t === 'projects' && <span className="tab__count">{projects.length}</span>}
+              {/* Keyed on the number so the badge remounts — and replays its
+                  pop — when the live list lands on a different count. */}
+              {t === 'projects' && (
+                <span className="tab__count" key={projects.length}>
+                  {projects.length}
+                </span>
+              )}
             </button>
           ))}
         </nav>
+
+        {/* Reading progress; width comes from --scroll-progress. */}
+        <span className="topbar__progress" aria-hidden />
       </header>
 
-      <main className="main">
+      <main className="main" data-dir={direction.current > 0 ? 'forward' : 'back'}>
         {tab === 'overview' && (
           <OverviewPane
             projects={projects}

@@ -1,10 +1,11 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { asset } from '@/lib/basePath'
 import { formatRelative } from '@/lib/format'
 import type { Project } from '@/lib/types'
 import type { Tab } from '@/lib/useAppState'
+import Metric from './Metric'
 import ProjectCard from './ProjectCard'
 import { ArrowIcon, ChevronIcon, GitHubIcon, LanguageIcon, RequestIcon } from './Icons'
 
@@ -91,29 +92,17 @@ export default function OverviewPane({
         </div>
       </section>
 
-      <div className="metrics">
-        <div className="metric">
-          <div className="metric__v">{projects.length}</div>
-          <div className="metric__k">Projects</div>
-        </div>
-        <div className="metric">
-          <div className="metric__v">{stats.stars}</div>
-          <div className="metric__k">Stars</div>
-        </div>
-        <div className="metric">
-          <div className="metric__v">{stats.languages.length}</div>
-          <div className="metric__k">Languages</div>
-        </div>
-        <div className="metric">
-          <div className="metric__v metric__v--text">{formatRelative(stats.lastPush)}</div>
-          <div className="metric__k">Last push</div>
-        </div>
+      <div className="metrics" data-reveal>
+        <Metric value={projects.length} label="Projects" />
+        <Metric value={stats.stars} label="Stars" />
+        <Metric value={stats.languages.length} label="Languages" />
+        <Metric value={formatRelative(stats.lastPush)} label="Last push" />
       </div>
 
       <Gallery projects={gallery} onOpen={onOpenProject} onAll={() => onNavigate('projects')} />
 
       <section className="band">
-        <div className="band__head">
+        <div className="band__head" data-reveal>
           <div>
             <h2 className="band__title">Everything else</h2>
             <p className="band__hint">Three sections, one line each.</p>
@@ -122,6 +111,7 @@ export default function OverviewPane({
 
         <div className="slabs">
           <Slab
+            index={0}
             title="Stack"
             text="Languages, domains and shared topics — counted from the repositories themselves, so it can never drift out of date."
             action="Open the stack"
@@ -137,6 +127,7 @@ export default function OverviewPane({
           </Slab>
 
           <Slab
+            index={1}
             title="About"
             text="What I focus on, and the handful of principles the projects are built on: local by default, security that stays honest, readable over clever."
             action="Read about me"
@@ -149,6 +140,7 @@ export default function OverviewPane({
           </Slab>
 
           <Slab
+            index={2}
             title="Contact"
             text="Questions about a project, help getting something running, a bug or security finding, or an idea you would like built."
             action="Get in touch"
@@ -173,16 +165,19 @@ function Slab({
   text,
   action,
   onAction,
+  index,
   children,
 }: {
   title: string
   text: string
   action: string
   onAction: () => void
+  /** Position in the column; drives the staggered reveal. */
+  index: number
   children: React.ReactNode
 }) {
   return (
-    <div className="slab">
+    <div className="slab" data-reveal style={{ '--i': index } as React.CSSProperties}>
       <div>
         <h3 className="slab__title">{title}</h3>
         <p className="slab__text">{text}</p>
@@ -223,6 +218,21 @@ function Gallery({
     const max = el.scrollWidth - el.clientWidth
     setEdges({ start: el.scrollLeft <= 4, end: el.scrollLeft >= max - 4 })
   }, [])
+
+  // Browsers may restore an overflow container's previous horizontal position
+  // when this tab mounts again. Always lead with the first curated project;
+  // repeat once on the next frame to win against late scroll restoration.
+  useLayoutEffect(() => {
+    const el = trackRef.current
+    if (!el) return
+    const reset = () => {
+      el.scrollLeft = 0
+      sync()
+    }
+    reset()
+    const frame = requestAnimationFrame(reset)
+    return () => cancelAnimationFrame(frame)
+  }, [projects, sync])
 
   useEffect(() => {
     const el = trackRef.current
@@ -287,7 +297,7 @@ function Gallery({
 
   return (
     <section className="band">
-      <div className="band__head">
+      <div className="band__head" data-reveal>
         <div>
           <h2 className="band__title">Featured projects</h2>
           <p className="band__hint">Swipe or use the arrows — pick one for readme and links.</p>

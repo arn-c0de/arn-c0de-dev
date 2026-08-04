@@ -81,7 +81,7 @@ export default function AboutPane({
         </div>
 
         <div className="roles">
-          <article className="role">
+          <article className="role" data-reveal>
             <span className="role__tag">Training</span>
             <h3 className="role__title">Electronics technician for devices and systems</h3>
             <p className="role__text">
@@ -90,7 +90,7 @@ export default function AboutPane({
             </p>
           </article>
 
-          <article className="role role--lead">
+          <article className="role role--lead" data-reveal style={{ '--i': 1 } as React.CSSProperties}>
             <span className="role__tag role__tag--lead">Freelance &amp; personal</span>
             <h3 className="role__title">Embedded, backends, apps</h3>
             <p className="role__text">
@@ -110,7 +110,7 @@ export default function AboutPane({
           </div>
         </div>
 
-        <div className="slab slab--prose">
+        <div className="slab slab--prose" data-reveal>
           <div className="prose">
             <p>
               Most of what you find here started as something I wanted for myself — an encrypted
@@ -160,7 +160,7 @@ export default function AboutPane({
         </div>
 
         <div className="facts">
-          <div className="fact">
+          <div className="fact" data-reveal>
             <h3 className="section__title">Focus</h3>
             <div className="tagrow">
               {FOCUS.map((f) => (
@@ -171,7 +171,7 @@ export default function AboutPane({
             </div>
           </div>
 
-          <div className="fact">
+          <div className="fact" data-reveal style={{ '--i': 1 } as React.CSSProperties}>
             <h3 className="section__title">Works in</h3>
             <div className="tagrow">
               {WORKING.map((l) => (
@@ -184,7 +184,7 @@ export default function AboutPane({
             <p className="fact__note">C mostly on ESP32, SDR and Wi-Fi.</p>
           </div>
 
-          <div className="fact">
+          <div className="fact" data-reveal style={{ '--i': 2 } as React.CSSProperties}>
             <h3 className="section__title">Learning</h3>
             <div className="tagrow">
               {LEARNING.map((l) => (
@@ -198,7 +198,7 @@ export default function AboutPane({
           </div>
 
           {/* Counted from the live repository data rather than listed by hand. */}
-          <div className="fact">
+          <div className="fact" data-reveal style={{ '--i': 3 } as React.CSSProperties}>
             <h3 className="section__title">In the repositories</h3>
             <div className="tagrow">
               {languages.map((l) => (
@@ -210,7 +210,7 @@ export default function AboutPane({
             </div>
           </div>
 
-          <div className="fact">
+          <div className="fact" data-reveal style={{ '--i': 4 } as React.CSSProperties}>
             <h3 className="section__title">Speaks</h3>
             <div className="tagrow">
               {SPOKEN.map(([lang, level]) => (
@@ -234,7 +234,12 @@ export default function AboutPane({
 
         <div className="principles">
           {PRINCIPLES.map((p, i) => (
-            <article key={p.title} className="principle">
+            <article
+              key={p.title}
+              className="principle"
+              data-reveal
+              style={{ '--i': i } as React.CSSProperties}
+            >
               <h3 className="principle__title">
                 <span className="principle__n">{String(i + 1).padStart(2, '0')}</span>
                 {p.title}

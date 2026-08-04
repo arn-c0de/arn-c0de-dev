@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
+import { usePrefersReducedMotion } from '@/lib/useMotion'
 import { MoonIcon, SunIcon } from './Icons'
 
 type Theme = 'light' | 'dark' | 'system'
@@ -12,6 +14,8 @@ type Theme = 'light' | 'dark' | 'system'
  */
 export default function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>('system')
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const reduced = usePrefersReducedMotion()
 
   useEffect(() => {
     const stored = localStorage.getItem('theme')
@@ -20,25 +24,67 @@ export default function ThemeToggle() {
 
   function cycle() {
     const next: Theme = theme === 'system' ? 'light' : theme === 'light' ? 'dark' : 'system'
-    setTheme(next)
-    if (next === 'system') {
-      delete document.documentElement.dataset.theme
-      localStorage.removeItem('theme')
-    } else {
-      document.documentElement.dataset.theme = next
-      localStorage.setItem('theme', next)
+
+    const apply = () => {
+      // flushSync so the icon swaps inside the same view transition as the
+      // colours — otherwise React commits it after the snapshot is taken.
+      flushSync(() => setTheme(next))
+      if (next === 'system') {
+        delete document.documentElement.dataset.theme
+        localStorage.removeItem('theme')
+      } else {
+        document.documentElement.dataset.theme = next
+        localStorage.setItem('theme', next)
+      }
     }
+
+    const button = buttonRef.current
+    if (reduced || !button || !document.startViewTransition) {
+      apply()
+      return
+    }
+
+    // The new theme is revealed by a circle growing out of this button, so the
+    // switch visibly starts where it was pressed.
+    const box = button.getBoundingClientRect()
+    const x = box.left + box.width / 2
+    const y = box.top + box.height / 2
+    const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))
+
+    const transition = document.startViewTransition(apply)
+    transition.ready
+      .then(() => {
+        document.documentElement.animate(
+          { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+          {
+            duration: 520,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+            pseudoElement: '::view-transition-new(root)',
+          },
+        )
+      })
+      // An interrupted transition is not worth reporting; the theme is set
+      // either way because `apply` runs synchronously inside it.
+      .catch(() => {})
   }
 
   const label =
     theme === 'system' ? 'Theme: follows system' : `Theme: ${theme} (click to change)`
 
   return (
-    <button type="button" className="iconbtn" onClick={cycle} aria-label={label} title={label}>
-      {theme === 'dark' ? <MoonIcon /> : <SunIcon />}
-      {theme === 'system' && (
-        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.04em' }}>AUTO</span>
-      )}
+    <button
+      type="button"
+      ref={buttonRef}
+      className="iconbtn iconbtn--theme"
+      onClick={cycle}
+      aria-label={label}
+      title={label}
+    >
+      {/* Keyed on the theme so each icon mounts fresh and spins in. */}
+      <span className="themeicon" key={theme}>
+        {theme === 'dark' ? <MoonIcon /> : <SunIcon />}
+      </span>
+      {theme === 'system' && <span className="themeicon__auto">AUTO</span>}
     </button>
   )
 }
