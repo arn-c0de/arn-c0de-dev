@@ -20,11 +20,13 @@ export default function CommandPalette({
   onClose,
   onNavigate,
   onOpenProject,
+  onStartRequest,
 }: {
   projects: Project[]
   onClose: () => void
   onNavigate: (tab: Tab) => void
   onOpenProject: (name: string) => void
+  onStartRequest: () => void
 }) {
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
@@ -36,7 +38,6 @@ export default function CommandPalette({
       { tab: 'projects', label: 'Projects', hint: 'Browse the repository grid' },
       { tab: 'stack', label: 'Stack', hint: 'Languages, domains and topics' },
       { tab: 'about', label: 'About', hint: 'Focus areas and working principles' },
-      { tab: 'request', label: 'Request', hint: 'Build an inquiry email to send' },
       { tab: 'contact', label: 'Contact', hint: 'SimpleX, email and PGP key' },
     ]
 
@@ -65,6 +66,16 @@ export default function CommandPalette({
         },
       })),
       {
+        id: 'action:request',
+        group: 'Navigate',
+        name: 'Start a request',
+        hint: 'Build an inquiry email to send',
+        run: () => {
+          onStartRequest()
+          onClose()
+        },
+      },
+      {
         id: 'link:github',
         group: 'Links',
         name: 'Open GitHub profile',
@@ -75,7 +86,7 @@ export default function CommandPalette({
         },
       },
     ]
-  }, [projects, query, onNavigate, onOpenProject, onClose])
+  }, [projects, query, onNavigate, onOpenProject, onStartRequest, onClose])
 
   // Tab entries are filtered by name, project entries are pre-filtered above.
   const results = useMemo(() => {

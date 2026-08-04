@@ -41,7 +41,7 @@ export default function StackPane({
   }, [projects])
 
   return (
-    <div className="pane">
+    <div className="pane stack-pane">
       <div className="pane__head">
         <h1 className="pane__title">Stack</h1>
         <p className="pane__lede">
@@ -53,41 +53,45 @@ export default function StackPane({
       <div className="metrics">
         <div className="metric">
           <div className="metric__v">{projects.length}</div>
-          <div className="metric__k">public projects</div>
+          <div className="metric__k">Projects</div>
         </div>
         <div className="metric">
           <div className="metric__v">{stats.stars}</div>
-          <div className="metric__k">stars earned</div>
+          <div className="metric__k">Stars</div>
         </div>
         <div className="metric">
           <div className="metric__v">{stats.languages.length}</div>
-          <div className="metric__k">languages</div>
+          <div className="metric__k">Languages</div>
         </div>
         <div className="metric">
           <div className="metric__v">{stats.topics.length}</div>
-          <div className="metric__k">recurring topics</div>
+          <div className="metric__k">Shared topics</div>
         </div>
       </div>
 
       <section className="section">
-        <h2 className="section__title">Languages by project count</h2>
+        <h2 className="section__title">Languages</h2>
         <div className="bars">
           {stats.languages.map(([name, count]) => (
-            <div key={name} className="bar__row">
-              <span className="bar__name">{name}</span>
+            <div
+              key={name}
+              className="bar__row"
+              style={{ '--hue': languageHue(name) } as React.CSSProperties}
+            >
+              <div className="bar__meta">
+                <span className="bar__name">
+                  <span className="bar__dot" />
+                  {name}
+                </span>
+                <span className="bar__n">
+                  {count} repo{count === 1 ? '' : 's'}
+                </span>
+              </div>
               <span className="bar__track">
                 <span
                   className="bar__fill"
-                  style={
-                    {
-                      width: `${(count / stats.max) * 100}%`,
-                      '--hue': languageHue(name),
-                    } as React.CSSProperties
-                  }
+                  style={{ width: `${(count / stats.max) * 100}%` }}
                 />
-              </span>
-              <span className="bar__n">
-                {count} repo{count === 1 ? '' : 's'}
               </span>
             </div>
           ))}
@@ -96,13 +100,13 @@ export default function StackPane({
 
       <section className="section">
         <h2 className="section__title">Domains</h2>
-        <div className="cards">
+        <div className="domain-grid">
           {stats.categories.map(([name, count]) => (
-            <div key={name} className="infocard">
-              <h3>{name}</h3>
-              <p>
-                {count} project{count === 1 ? '' : 's'}
-              </p>
+            <div key={name} className="domain-card">
+              <span className="domain-card__name">{name}</span>
+              <span className="domain-card__count" title={`${count} project${count === 1 ? '' : 's'}`}>
+                {count}
+              </span>
             </div>
           ))}
         </div>

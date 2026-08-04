@@ -10,21 +10,20 @@ import CommandPalette from './CommandPalette'
 import ContactPane from './ContactPane'
 import ProjectPanel from './ProjectPanel'
 import ProjectsPane from './ProjectsPane'
-import RequestPane from './RequestPane'
+import RequestModal from './RequestModal'
 import StackPane from './StackPane'
 import ThemeToggle from './ThemeToggle'
-import { GitHubIcon, SearchIcon } from './Icons'
+import { GitHubIcon, MailIcon, SearchIcon } from './Icons'
 
 const TAB_LABELS: Record<Tab, string> = {
   projects: 'Projects',
   stack: 'Stack',
   about: 'About',
-  request: 'Request',
   contact: 'Contact',
 }
 
 export default function AppShell() {
-  const [{ tab, project: openProject, requestFor }, navigate] = useAppState()
+  const [{ tab, project: openProject, request, requestFor }, navigate] = useAppState()
   // Start from the committed snapshot so the first paint already has content,
   // then swap in live data when the API answers.
   const [projects, setProjects] = useState<Project[]>(snapshotProjects)
@@ -82,14 +81,14 @@ export default function AppShell() {
   const openDetail = useCallback((name: string) => navigate({ tab: 'projects', project: name }), [navigate])
   const closeDetail = useCallback(() => navigate({ project: null }), [navigate])
 
-  // From the detail panel: close it, switch to the request tab, keep the
-  // project attached (and do not add it twice if it is already there).
+  // From the detail panel: close it, open the request modal over the page and
+  // keep the project attached (without adding it twice).
   const startRequest = useCallback(
-    (repo: string) =>
+    (repo?: string) =>
       navigate({
-        tab: 'request',
         project: null,
-        requestFor: requestFor.includes(repo) ? requestFor : [...requestFor, repo],
+        request: true,
+        requestFor: !repo || requestFor.includes(repo) ? requestFor : [...requestFor, repo],
       }),
     [navigate, requestFor],
   )
@@ -124,6 +123,11 @@ export default function AppShell() {
             <span className="kbd" style={{ border: 0, background: 'none', padding: 0 }}>
               ⌘K
             </span>
+          </button>
+
+          <button type="button" className="btn btn--primary btn--sm" onClick={() => startRequest()}>
+            <MailIcon />
+            Request
           </button>
 
           <a
@@ -167,13 +171,6 @@ export default function AppShell() {
         )}
         {tab === 'stack' && <StackPane projects={projects} onTopicSelect={showTopic} />}
         {tab === 'about' && <AboutPane projects={projects} />}
-        {tab === 'request' && (
-          <RequestPane
-            projects={projects}
-            selected={requestFor}
-            onSelectedChange={(names) => navigate({ requestFor: names })}
-          />
-        )}
         {tab === 'contact' && <ContactPane />}
       </main>
 
@@ -220,12 +217,22 @@ export default function AppShell() {
         <ProjectPanel project={selected} onClose={closeDetail} onRequest={startRequest} />
       )}
 
+      {request && (
+        <RequestModal
+          projects={projects}
+          selected={requestFor}
+          onSelectedChange={(names) => navigate({ requestFor: names })}
+          onClose={() => navigate({ request: false })}
+        />
+      )}
+
       {paletteOpen && (
         <CommandPalette
           projects={projects}
           onClose={() => setPaletteOpen(false)}
           onNavigate={(t) => navigate({ tab: t, project: null })}
           onOpenProject={openDetail}
+          onStartRequest={() => startRequest()}
         />
       )}
     </div>

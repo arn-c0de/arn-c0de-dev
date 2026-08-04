@@ -2,14 +2,16 @@
 
 import { useCallback, useEffect, useState } from 'react'
 
-export const TABS = ['projects', 'stack', 'about', 'request', 'contact'] as const
+export const TABS = ['projects', 'stack', 'about', 'contact'] as const
 export type Tab = (typeof TABS)[number]
 
 export interface AppState {
   tab: Tab
   /** Repo name of the open detail panel, or null when nothing is open. */
   project: string | null
-  /** Repo names pre-selected on the request tab, as a comma-separated list. */
+  /** Whether the request modal is open. */
+  request: boolean
+  /** Repo names pre-attached to the request, so a prepared link can be shared. */
   requestFor: string[]
 }
 
@@ -17,9 +19,13 @@ function parse(search: string): AppState {
   const params = new URLSearchParams(search)
   const tab = params.get('tab') as Tab | null
   const forParam = params.get('for')
+  // `?tab=request` was the old address of the request form; keep those links
+  // working now that it is a modal rather than a tab.
+  const legacyRequestTab = params.get('tab') === 'request'
   return {
     tab: tab && TABS.includes(tab) ? tab : 'projects',
     project: params.get('p'),
+    request: params.get('request') === '1' || legacyRequestTab,
     requestFor: forParam ? forParam.split(',').filter(Boolean) : [],
   }
 }
@@ -28,13 +34,14 @@ function serialise(state: AppState): string {
   const params = new URLSearchParams()
   if (state.tab !== 'projects') params.set('tab', state.tab)
   if (state.project) params.set('p', state.project)
+  if (state.request) params.set('request', '1')
   if (state.requestFor.length) params.set('for', state.requestFor.join(','))
   const query = params.toString()
   return query ? `?${query}` : location.pathname
 }
 
 /**
- * Tab and detail-panel state kept in the URL query string, so every view is
+ * Tab, panel and modal state kept in the URL query string, so every view is
  * linkable and the browser's back button behaves the way it does in an app.
  * Query params rather than routes — a static host has no server to resolve
  * deep paths on a hard refresh.
@@ -43,6 +50,7 @@ export function useAppState(): [AppState, (next: Partial<AppState>) => void] {
   const [state, setState] = useState<AppState>({
     tab: 'projects',
     project: null,
+    request: false,
     requestFor: [],
   })
 
