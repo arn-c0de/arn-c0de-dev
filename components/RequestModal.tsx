@@ -16,7 +16,17 @@ import {
   type ServiceAreaId,
 } from '@/lib/request'
 import type { Project } from '@/lib/types'
-import { CheckIcon, CloseIcon, CopyIcon } from './Icons'
+import { CheckIcon, CloseIcon, CopyIcon, SearchIcon } from './Icons'
+
+/** One labelled row. Every control in the form sits in one of these. */
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="frow">
+      <span className="frow__label">{label}</span>
+      <div className="frow__field">{children}</div>
+    </div>
+  )
+}
 
 export default function RequestModal({
   projects,
@@ -33,6 +43,7 @@ export default function RequestModal({
   const [email, setEmail] = useState('')
   const [type, setType] = useState<InquiryTypeId>('question')
   const [areas, setAreas] = useState<ServiceAreaId[]>([])
+  const [areaQuery, setAreaQuery] = useState('')
   const [timeline, setTimeline] = useState<RequestDraft['timeline']>(TIMELINES[0])
   const [message, setMessage] = useState('')
   const [touched, setTouched] = useState(false)
@@ -43,6 +54,18 @@ export default function RequestModal({
     () => selected.map((n) => projects.find((p) => p.name === n)).filter(Boolean) as Project[],
     [selected, projects],
   )
+
+  /** Selected areas stay pinned at the top so a search never hides a choice. */
+  const visibleAreas = useMemo(() => {
+    const q = areaQuery.trim().toLowerCase()
+    const matches = q
+      ? SERVICE_AREAS.filter(
+          (a) => a.title.toLowerCase().includes(q) || a.keywords.includes(q),
+        )
+      : SERVICE_AREAS
+    const picked = SERVICE_AREAS.filter((a) => areas.includes(a.id))
+    return [...picked, ...matches.filter((a) => !areas.includes(a.id))]
+  }, [areaQuery, areas])
 
   const draft: RequestDraft = { name, email, type, areas, timeline, message, projects: chosen }
   const subject = buildSubject(draft)
@@ -104,8 +127,7 @@ export default function RequestModal({
 
         <div className="modal__cols">
           <div className="modal__form">
-            <div className="fset">
-              <span className="fset__label">Type</span>
+            <Row label="Type">
               <div className="chips chips--tight">
                 {INQUIRY_TYPES.map((t) => (
                   <button
@@ -119,36 +141,49 @@ export default function RequestModal({
                   </button>
                 ))}
               </div>
-            </div>
+            </Row>
 
-            <div className="fset">
-              <span className="fset__label">Areas</span>
-              <div className="picks picks--tight">
-                {SERVICE_AREAS.map((area) => {
-                  const on = areas.includes(area.id)
-                  return (
-                    <button
-                      key={area.id}
-                      type="button"
-                      className="pick pick--tight"
-                      aria-pressed={on}
-                      onClick={() => toggleArea(area.id)}
-                      title={area.blurb}
-                    >
-                      <span className="pick__box" aria-hidden>
-                        {on && <CheckIcon />}
-                      </span>
-                      <span className="pick__title">{area.title}</span>
-                    </button>
-                  )
-                })}
+            <Row label={areas.length ? `Areas (${areas.length})` : 'Areas'}>
+              <div className="search search--sm">
+                <span className="search__icon">
+                  <SearchIcon />
+                </span>
+                <input
+                  type="search"
+                  value={areaQuery}
+                  onChange={(e) => setAreaQuery(e.target.value)}
+                  placeholder="Search areas — lora, pcap, kotlin…"
+                  aria-label="Search areas"
+                />
               </div>
-            </div>
+              <div className="arealist">
+                {visibleAreas.length === 0 ? (
+                  <p className="arealist__empty">No area matches “{areaQuery}”.</p>
+                ) : (
+                  visibleAreas.map((area) => {
+                    const on = areas.includes(area.id)
+                    return (
+                      <button
+                        key={area.id}
+                        type="button"
+                        className="areaitem"
+                        aria-pressed={on}
+                        onClick={() => toggleArea(area.id)}
+                      >
+                        <span className="pick__box" aria-hidden>
+                          {on && <CheckIcon />}
+                        </span>
+                        {area.title}
+                      </button>
+                    )
+                  })
+                )}
+              </div>
+            </Row>
 
-            <div className="fset">
-              <span className="fset__label">Projects</span>
+            <Row label="Projects">
               {chosen.length > 0 && (
-                <div className="chips chips--tight" style={{ marginBottom: 6 }}>
+                <div className="chips chips--tight" style={{ marginBottom: 5 }}>
                   {chosen.map((p) => (
                     <button
                       key={p.name}
@@ -179,49 +214,45 @@ export default function RequestModal({
                     </option>
                   ))}
               </select>
-            </div>
+            </Row>
 
-            <div className="fset fset__grid">
-              <label className="field">
-                <span className="fset__label">Name</span>
-                <input
-                  className="input input--sm"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  onBlur={() => setTouched(true)}
-                  placeholder="Jane Doe"
-                  autoComplete="name"
-                />
-              </label>
-              <label className="field">
-                <span className="fset__label">Email</span>
-                <input
-                  className="input input--sm"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onBlur={() => setTouched(true)}
-                  placeholder="jane@example.com"
-                  autoComplete="email"
-                />
-              </label>
-              <label className="field">
-                <span className="fset__label">Timeframe</span>
-                <select
-                  className="select select--wide select--sm"
-                  value={timeline}
-                  onChange={(e) => setTimeline(e.target.value as RequestDraft['timeline'])}
-                  aria-label="Timeline"
-                >
-                  {TIMELINES.map((t) => (
-                    <option key={t}>{t}</option>
-                  ))}
-                </select>
-              </label>
-            </div>
+            <Row label="Name">
+              <input
+                className="input input--sm"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onBlur={() => setTouched(true)}
+                placeholder="Jane Doe"
+                autoComplete="name"
+              />
+            </Row>
 
-            <label className="fset field">
-              <span className="fset__label">Message</span>
+            <Row label="Email">
+              <input
+                className="input input--sm"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onBlur={() => setTouched(true)}
+                placeholder="jane@example.com"
+                autoComplete="email"
+              />
+            </Row>
+
+            <Row label="When">
+              <select
+                className="select select--wide select--sm"
+                value={timeline}
+                onChange={(e) => setTimeline(e.target.value as RequestDraft['timeline'])}
+                aria-label="Timeline"
+              >
+                {TIMELINES.map((t) => (
+                  <option key={t}>{t}</option>
+                ))}
+              </select>
+            </Row>
+
+            <Row label="Message">
               <textarea
                 className="input input--area input--sm"
                 value={message}
@@ -230,7 +261,7 @@ export default function RequestModal({
                 rows={4}
                 placeholder="What are you trying to build, and where do you need help?"
               />
-            </label>
+            </Row>
           </div>
 
           <aside className="modal__preview">

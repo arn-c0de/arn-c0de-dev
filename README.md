@@ -118,7 +118,7 @@ Everything configurable lives in `lib/request.ts`:
 ```ts
 INQUIRY_EMAIL   // where requests go — kept separate from the secure-contact address
 INQUIRY_TYPES   // the request-type chips
-SERVICE_AREAS   // the selectable topic cards
+SERVICE_AREAS   // the searchable topic list (title + keywords the search matches on)
 TIMELINES       // timeframe options
 MAILTO_LIMIT    // above this the UI steers people to Copy draft instead
 ```

@@ -1583,15 +1583,31 @@ a:hover {
   min-height: 0;
 }
 
-/* Field groups — tighter than the standalone form styles. */
+/* One uniform labelled row for every control in the modal. */
 
-.fset {
-  display: block;
-  margin-bottom: 12px;
+.frow {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
 }
 
-.fset:last-child {
-  margin-bottom: 0;
+.frow:last-child {
+  border-bottom: 0;
+}
+
+.frow__label {
+  padding-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-faint);
+  line-height: 1.2;
+}
+
+.frow__field {
+  min-width: 0;
 }
 
 .fset__label {
@@ -1604,48 +1620,97 @@ a:hover {
   color: var(--text-faint);
 }
 
-.fset__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
-  gap: 10px;
-}
-
 .chips--tight {
-  gap: 5px;
+  gap: 4px;
   margin-bottom: 0;
 }
 
 .chip--sm {
-  height: 25px;
-  padding: 0 9px;
-  font-size: 12.5px;
+  height: 24px;
+  padding: 0 8px;
+  font-size: 12px;
 }
 
-.picks--tight {
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 6px;
+/* Searchable area list */
+
+.search--sm {
+  flex: none;
+  min-width: 0;
+  margin-bottom: 6px;
 }
 
-.pick--tight {
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: var(--radius-sm);
-}
-
-.pick--tight:hover {
-  transform: none;
-}
-
-.pick--tight .pick__box {
-  width: 16px;
-  height: 16px;
-  margin-top: 0;
-}
-
-.pick--tight .pick__title {
+.search--sm input {
+  height: 30px;
+  padding: 0 10px 0 30px;
   font-size: 13px;
+}
+
+.search--sm .search__icon {
+  left: 9px;
+}
+
+.arealist {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: 3px;
+  max-height: 138px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  /* Rows wrap to two lines at different points, so the scroll edge would
+     otherwise slice a title in half and read as a rendering fault. */
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 16px), transparent);
+}
+
+.areaitem {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 7px;
+  text-align: left;
+  font-size: 12.5px;
+  line-height: 1.25;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.areaitem:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.areaitem[aria-pressed='true'] {
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  color: var(--text);
   font-weight: 600;
+}
+
+.areaitem .pick__box {
+  width: 15px;
+  height: 15px;
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
+.areaitem[aria-pressed='true'] .pick__box {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.arealist__empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 14px 8px;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--text-faint);
 }
 
 .input--sm {

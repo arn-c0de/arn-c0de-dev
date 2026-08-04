@@ -23,33 +23,31 @@ export const INQUIRY_TYPES = [
 
 export type InquiryTypeId = (typeof INQUIRY_TYPES)[number]['id']
 
-/** Topic areas, describing what the repositories actually cover. */
+/**
+ * The pickable catalogue. Long enough to need the search box in the modal, and
+ * every entry maps to work that actually exists in the repositories.
+ * `keywords` only feeds the search — it never appears in the UI.
+ */
 export const SERVICE_AREAS = [
-  {
-    id: 'embedded',
-    title: 'Embedded & firmware',
-    blurb: 'ESP32 and Arduino firmware, LoRa mesh links, sensors, USB HID devices.',
-  },
-  {
-    id: 'security',
-    title: 'Network & security tooling',
-    blurb: 'Traffic capture and analysis, intrusion and flood detection, key management.',
-  },
-  {
-    id: 'ai',
-    title: 'Local AI & RAG',
-    blurb: 'Assistants that answer from your own documents, running on your hardware.',
-  },
-  {
-    id: 'android',
-    title: 'Android apps',
-    blurb: 'Kotlin and Jetpack Compose, offline-capable, with local encrypted storage.',
-  },
-  {
-    id: 'unsure',
-    title: 'Not sure yet',
-    blurb: 'Describe the problem and we work out what it needs.',
-  },
+  { id: 'firmware', title: 'ESP32 & Arduino firmware', keywords: 'embedded microcontroller esp32 esp8266 arduino c cpp platformio' },
+  { id: 'lora', title: 'LoRa & mesh networking', keywords: 'radio rf long range mesh multi-hop relay lorawan' },
+  { id: 'sensors', title: 'Sensors & data acquisition', keywords: 'adc emg biosignal measurement sampling gpio spectrum fft oscilloscope' },
+  { id: 'hid', title: 'USB HID & input devices', keywords: 'keyboard macro pad atmega32u4 pro micro encoder button panel joystick' },
+  { id: 'wireless', title: 'WiFi & Bluetooth scanning', keywords: 'wardriving ble beacon signal mapping survey rssi' },
+  { id: 'ota', title: 'OTA updates & device management', keywords: 'firmware update provisioning fleet bootloader sd card launcher' },
+  { id: 'netmon', title: 'Network monitoring', keywords: 'traffic flows live view connections bandwidth ntopng' },
+  { id: 'capture', title: 'Packet capture & analysis', keywords: 'pcap wireshark tcpdump sniffing fritzbox forensics' },
+  { id: 'detection', title: 'Intrusion & flood detection', keywords: 'ids arp spoofing dhcp syn flood firewall nftables defence' },
+  { id: 'crypto', title: 'Encryption & key management', keywords: 'pgp gnupg gpg openpgp keys signing backup secure storage aes' },
+  { id: 'hardening', title: 'Server hardening & monitoring', keywords: 'linux ssh login alerts ntfy observability logs auditing vps' },
+  { id: 'llm', title: 'Local LLMs & RAG', keywords: 'ollama assistant retrieval augmented generation embeddings vector offline ai' },
+  { id: 'osint', title: 'Web research & OSINT', keywords: 'scraping crawling ethical automation sources multi-hop reasoning' },
+  { id: 'pipelines', title: 'Data pipelines & APIs', keywords: 'fastapi postgresql alembic etl ingestion backend rest scheduling' },
+  { id: 'dashboards', title: 'Dashboards & visualisation', keywords: 'realtime charts plots globe map dash plotly websocket telemetry' },
+  { id: 'desktop', title: 'Desktop applications', keywords: 'qt qt6 pyside gui cross-platform windows linux tkinter' },
+  { id: 'android', title: 'Android apps', keywords: 'kotlin jetpack compose mobile mvvm offline sqlcipher room' },
+  { id: 'geo', title: 'Maps & geolocation', keywords: 'gps routing markers navigation offline tiles coordinates' },
+  { id: 'unsure', title: 'Not sure yet', keywords: 'help advice unclear discuss scoping' },
 ] as const
 
 export type ServiceAreaId = (typeof SERVICE_AREAS)[number]['id']
@@ -125,9 +123,7 @@ export function buildBody(draft: RequestDraft): string {
   lines.push('— Contact —')
   lines.push(pad('Name') + (draft.name.trim() || '(not given)'))
   lines.push(pad('Email') + (draft.email.trim() || '(not given)'))
-  lines.push('')
 
-  lines.push('Composed on arn-c0de.github.io')
   return lines.join('\n')
 }
 
