@@ -3,6 +3,7 @@
 import { useMemo } from 'react'
 import { languageHue } from '@/lib/format'
 import type { Project } from '@/lib/types'
+import { LanguageIcon } from './Icons'
 
 /**
  * Everything here is aggregated from the live repo data — no hand-maintained
@@ -80,7 +81,7 @@ export default function StackPane({
             >
               <div className="bar__meta">
                 <span className="bar__name">
-                  <span className="bar__dot" />
+                  <LanguageIcon language={name} />
                   {name}
                 </span>
                 <span className="bar__n">

@@ -80,7 +80,9 @@ export default function AppShell() {
     [projects, openProject],
   )
 
-  const openDetail = useCallback((name: string) => navigate({ tab: 'projects', project: name }), [navigate])
+  // The panel is an overlay, so opening one keeps you where you were — the
+  // overview gallery and the topbar search both slide it out in place.
+  const openDetail = useCallback((name: string) => navigate({ project: name }), [navigate])
   const closeDetail = useCallback(() => navigate({ project: null }), [navigate])
 
   // From the detail panel: close it, open the request modal over the page and
@@ -171,7 +173,6 @@ export default function AppShell() {
             onNavigate={(t) => navigate({ tab: t, project: null })}
             onOpenProject={openDetail}
             onStartRequest={() => startRequest()}
-            onTopicSelect={showTopic}
           />
         )}
         {tab === 'projects' && (

@@ -123,3 +123,66 @@ export function MailIcon() {
     </svg>
   )
 }
+
+/**
+ * Small, locally drawn language marks for the Stack pane. They deliberately
+ * share one badge shape so the mixed toolchain reads as a coherent set rather
+ * than a collection of third-party logos.
+ */
+export function LanguageIcon({ language, size = 20 }: { language: string; size?: number }) {
+  const key = language.toLowerCase()
+  const specs: Record<string, { label: string; bg: string; fg: string; fontSize?: number }> = {
+    c: { label: 'C', bg: '#659ad2', fg: '#fff' },
+    'c++': { label: 'C++', bg: '#00599c', fg: '#fff', fontSize: 7.2 },
+    java: { label: 'J', bg: '#e76f00', fg: '#fff' },
+    javascript: { label: 'JS', bg: '#f7df1e', fg: '#171717', fontSize: 8.5 },
+    kotlin: { label: 'K', bg: '#7f52ff', fg: '#fff' },
+    python: { label: 'Py', bg: '#3776ab', fg: '#fff', fontSize: 8.5 },
+    shell: { label: '>_', bg: '#293137', fg: '#7ee787', fontSize: 8 },
+  }
+  const spec = specs[key] ?? { label: '</>', bg: '#64748b', fg: '#fff', fontSize: 7 }
+
+  return (
+    <svg
+      className="language-logo"
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      aria-hidden
+    >
+      <rect x="1" y="1" width="22" height="22" rx="6" fill={spec.bg} />
+
+      {key === 'python' && (
+        <path d="M1 14.5 23 8v9a6 6 0 0 1-6 6H7a6 6 0 0 1-6-6Z" fill="#ffd43b" />
+      )}
+      {key === 'kotlin' && (
+        <>
+          <path d="M1 1h22L1 23Z" fill="#f88909" />
+          <path d="M1 23 12 12l11 11Z" fill="#e448c4" />
+        </>
+      )}
+      {key === 'java' && (
+        <path
+          d="M9 8.4c2.8-1.2 4.2-2.2 3.1-3.7M11.5 9.7c3.8-1.5 5-2.9 3.4-4.7"
+          fill="none"
+          stroke="#fff"
+          strokeWidth="1.15"
+          strokeLinecap="round"
+          opacity=".78"
+        />
+      )}
+
+      <text
+        x="12"
+        y={key === 'java' ? 17.2 : 15.5}
+        fill={spec.fg}
+        fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace"
+        fontSize={spec.fontSize ?? 10.5}
+        fontWeight="800"
+        textAnchor="middle"
+      >
+        {spec.label}
+      </text>
+    </svg>
+  )
+}
