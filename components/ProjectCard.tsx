@@ -30,10 +30,14 @@ export default function ProjectCard({
       onClick={() => onOpen(project.name)}
       aria-label={`Open details for ${project.title}`}
     >
-      {/* Only a genuine project icon earns this slot — a language mark here
-          would read as the project's own logo. */}
       <div className="card__head">
-        {project.icon && <img className="card__icon" src={project.icon} alt="" width={26} height={26} />}
+        {project.icon ? (
+          <img className="card__icon" src={project.icon} alt="" width={26} height={26} />
+        ) : project.language ? (
+          <span className="card__icon card__icon--language">
+            <LanguageIcon language={project.language} size={18} />
+          </span>
+        ) : null}
         <h3 className="card__title">{project.title}</h3>
         {badge && <span className="card__flag">featured</span>}
       </div>
@@ -62,12 +66,7 @@ export default function ProjectCard({
             {project.forks_count}
           </span>
         )}
-        {project.language && (
-          <span className="card__stat card__stat--lang">
-            <LanguageIcon language={project.language} size={14} />
-            {project.language}
-          </span>
-        )}
+        {project.language && <span className="card__stat">{project.language}</span>}
         <span className="card__when">{formatRelative(project.pushed_at)}</span>
         <span className="card__go" aria-hidden>
           <ArrowIcon />

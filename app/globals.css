@@ -571,6 +571,17 @@ a:hover {
   width: 100%;
 }
 
+.gallery__slide .card__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+.gallery__slide .card__icon--language .language-logo {
+  width: 24px;
+  height: 24px;
+}
+
 /* Section rows: description on the left, the way in on the right third. */
 
 .slabs {
@@ -893,6 +904,16 @@ a:hover {
   background: var(--bg-inset);
 }
 
+.card__icon--language {
+  display: grid;
+  place-items: center;
+}
+
+.card__icon--language .language-logo {
+  width: 18px;
+  height: 18px;
+}
+
 .card__title {
   flex: 1;
   min-width: 0;
@@ -939,7 +960,7 @@ a:hover {
 
 .card__foot {
   margin-top: auto;
-  padding-top: 10px;
+  padding-top: 12px;
   border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -963,14 +984,6 @@ a:hover {
 
 .card__stat:first-child svg {
   color: var(--star);
-}
-
-/* Small enough to read as a marker beside the language name rather than as an
-   emblem for the repository. */
-.card__stat--lang .language-logo {
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
 }
 
 .card__when {
