@@ -106,7 +106,12 @@ The repository must be public for Pages to publish on a free account.
 Visitors pick what their message is about — a request type, one or more topic areas, any projects
 they added via *Ask about this* in a project panel — and get a finished email they only have to
 send. It opens from the *Request* button in the top bar, from a project panel, or from the command
-palette, and shows the live draft next to the form. There is no backend: the draft is built in the browser and handed to their own mail client
+palette, and shows the live draft next to the form.
+
+Areas and projects are both picked through `components/SearchPicker.tsx` — one search box over a
+scrollable multi-select list, with chosen entries pinned to the top so a search can never hide a
+selection. Projects match on name, description, language, category and topics, so "esp32" or
+"rag" finds them without knowing the repository name. There is no backend: the draft is built in the browser and handed to their own mail client
 through a `mailto:` link, with *Copy draft* as the fallback when no client is configured.
 
 The wording is deliberately neutral. There is no budget field, no rates and no "commissioned work"

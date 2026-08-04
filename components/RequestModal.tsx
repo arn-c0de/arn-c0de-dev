@@ -16,7 +16,8 @@ import {
   type ServiceAreaId,
 } from '@/lib/request'
 import type { Project } from '@/lib/types'
-import { CheckIcon, CloseIcon, CopyIcon, SearchIcon } from './Icons'
+import SearchPicker, { type PickerItem } from './SearchPicker'
+import { CheckIcon, CloseIcon, CopyIcon } from './Icons'
 
 /** One labelled row. Every control in the form sits in one of these. */
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -43,7 +44,6 @@ export default function RequestModal({
   const [email, setEmail] = useState('')
   const [type, setType] = useState<InquiryTypeId>('question')
   const [areas, setAreas] = useState<ServiceAreaId[]>([])
-  const [areaQuery, setAreaQuery] = useState('')
   const [timeline, setTimeline] = useState<RequestDraft['timeline']>(TIMELINES[0])
   const [message, setMessage] = useState('')
   const [touched, setTouched] = useState(false)
@@ -55,17 +55,22 @@ export default function RequestModal({
     [selected, projects],
   )
 
-  /** Selected areas stay pinned at the top so a search never hides a choice. */
-  const visibleAreas = useMemo(() => {
-    const q = areaQuery.trim().toLowerCase()
-    const matches = q
-      ? SERVICE_AREAS.filter(
-          (a) => a.title.toLowerCase().includes(q) || a.keywords.includes(q),
-        )
-      : SERVICE_AREAS
-    const picked = SERVICE_AREAS.filter((a) => areas.includes(a.id))
-    return [...picked, ...matches.filter((a) => !areas.includes(a.id))]
-  }, [areaQuery, areas])
+  const areaItems: PickerItem[] = useMemo(
+    () => SERVICE_AREAS.map((a) => ({ id: a.id, title: a.title, keywords: a.keywords })),
+    [],
+  )
+
+  /** Searching projects by language, topic or blurb beats scrolling a list. */
+  const projectItems: PickerItem[] = useMemo(
+    () =>
+      projects.map((p) => ({
+        id: p.name,
+        title: p.title,
+        keywords: [p.name, p.description ?? '', p.language ?? '', p.category, ...p.topics].join(' '),
+        meta: p.language ?? undefined,
+      })),
+    [projects],
+  )
 
   const draft: RequestDraft = { name, email, type, areas, timeline, message, projects: chosen }
   const subject = buildSubject(draft)
@@ -144,76 +149,27 @@ export default function RequestModal({
             </Row>
 
             <Row label={areas.length ? `Areas (${areas.length})` : 'Areas'}>
-              <div className="search search--sm">
-                <span className="search__icon">
-                  <SearchIcon />
-                </span>
-                <input
-                  type="search"
-                  value={areaQuery}
-                  onChange={(e) => setAreaQuery(e.target.value)}
-                  placeholder="Search areas — lora, pcap, kotlin…"
-                  aria-label="Search areas"
-                />
-              </div>
-              <div className="arealist">
-                {visibleAreas.length === 0 ? (
-                  <p className="arealist__empty">No area matches “{areaQuery}”.</p>
-                ) : (
-                  visibleAreas.map((area) => {
-                    const on = areas.includes(area.id)
-                    return (
-                      <button
-                        key={area.id}
-                        type="button"
-                        className="areaitem"
-                        aria-pressed={on}
-                        onClick={() => toggleArea(area.id)}
-                      >
-                        <span className="pick__box" aria-hidden>
-                          {on && <CheckIcon />}
-                        </span>
-                        {area.title}
-                      </button>
-                    )
-                  })
-                )}
-              </div>
+              <SearchPicker
+                items={areaItems}
+                selected={areas}
+                onToggle={(id) => toggleArea(id as ServiceAreaId)}
+                placeholder="Search areas — lora, pcap, kotlin…"
+                label="Search areas"
+              />
             </Row>
 
-            <Row label="Projects">
-              {chosen.length > 0 && (
-                <div className="chips chips--tight" style={{ marginBottom: 5 }}>
-                  {chosen.map((p) => (
-                    <button
-                      key={p.name}
-                      type="button"
-                      className="chip chip--sm"
-                      aria-pressed="true"
-                      onClick={() => onSelectedChange(selected.filter((n) => n !== p.name))}
-                      title={`Remove ${p.title}`}
-                    >
-                      {p.title}
-                      <CloseIcon />
-                    </button>
-                  ))}
-                </div>
-              )}
-              <select
-                className="select select--wide select--sm"
-                value=""
-                onChange={(e) => e.target.value && onSelectedChange([...selected, e.target.value])}
-                aria-label="Add a project to this request"
-              >
-                <option value="">{chosen.length ? 'Add another…' : 'Add a project (optional)…'}</option>
-                {projects
-                  .filter((p) => !selected.includes(p.name))
-                  .map((p) => (
-                    <option key={p.name} value={p.name}>
-                      {p.title}
-                    </option>
-                  ))}
-              </select>
+            <Row label={chosen.length ? `Projects (${chosen.length})` : 'Projects'}>
+              <SearchPicker
+                items={projectItems}
+                selected={selected}
+                onToggle={(id) =>
+                  onSelectedChange(
+                    selected.includes(id) ? selected.filter((n) => n !== id) : [...selected, id],
+                  )
+                }
+                placeholder="Search projects — esp32, python, rag…"
+                label="Search projects"
+              />
             </Row>
 
             <Row label="Name">

@@ -1653,7 +1653,7 @@ a:hover {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
   gap: 3px;
-  max-height: 138px;
+  max-height: 112px;
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 4px;
@@ -1702,6 +1702,21 @@ a:hover {
 .areaitem[aria-pressed='true'] .pick__box {
   background: var(--accent);
   border-color: var(--accent);
+}
+
+.areaitem__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.areaitem__meta {
+  margin-left: auto;
+  padding-left: 6px;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text-faint);
 }
 
 .arealist__empty {
