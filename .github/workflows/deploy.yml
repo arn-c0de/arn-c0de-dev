@@ -19,6 +19,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # This is a project Pages site, published below the repository name.
+      PAGES_BASE_PATH: /website
     steps:
       - uses: actions/checkout@v4
 

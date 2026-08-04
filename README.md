@@ -1,8 +1,8 @@
-# arn-c0de-dev
+# website
 
 Project console for [github.com/arn-c0de](https://github.com/arn-c0de) — a single-page app with
 tabs for projects, stack, about and secure contact.
-Live at **https://arn-c0de.github.io/arn-c0de-dev/**. Repository data comes from the GitHub API at
+Live at **https://arn-c0de.github.io/website/**. Repository data comes from the GitHub API at
 runtime; a committed snapshot keeps the site working when the API is rate-limited or unreachable.
 
 ## Stack
@@ -69,7 +69,7 @@ The service worker is skipped over plain HTTP, so `npm run dev` never serves sta
 
 ### The base path
 
-This is a *project* repo, so Pages serves it from `/arn-c0de-dev/` rather than a domain root.
+This is a *project* repo, so Pages serves it from `/website/` rather than a domain root.
 `next.config.mjs` sets `basePath` accordingly, and `lib/basePath.ts` exposes `asset()` for the
 handful of raw URL strings Next does not rewrite itself (manifest, icons, service worker, the
 `.asc` download). Change it in one place when the hosting changes:
@@ -85,17 +85,18 @@ Add a `public/CNAME` file containing the hostname if you point a custom domain h
 ## Deployment
 
 Pushing to `main` triggers `.github/workflows/deploy.yml`: typecheck → build → publish `out/` to
-GitHub Pages.
+GitHub Pages. The workflow explicitly builds with `PAGES_BASE_PATH=/website`, so generated assets,
+the manifest and the service-worker scope all point to `https://arn-c0de.github.io/website/`.
 
 **Settings → Pages → Source must stay on "GitHub Actions".** If it is ever switched to "Deploy
 from a branch", GitHub's legacy Jekyll builder takes over, publishes the repository root instead
 of the exported `out/` directory, and the site turns into a rendered copy of this README. That is
-the failure mode to recognise: a page titled `arn-c0de-dev` showing this text. Fixing it means
+the failure mode to recognise: a page titled `website` showing this text. Fixing it means
 setting the source back to GitHub Actions and re-running the workflow — the API equivalent is:
 
 ```bash
-gh api -X DELETE repos/arn-c0de/arn-c0de-dev/pages
-gh api -X POST   repos/arn-c0de/arn-c0de-dev/pages -f build_type=workflow
+gh api -X DELETE repos/arn-c0de/website/pages
+gh api -X POST   repos/arn-c0de/website/pages -f build_type=workflow
 gh workflow run deploy.yml --ref main
 ```
 

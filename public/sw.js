@@ -10,7 +10,7 @@
 const CACHE = 'arn-c0de-v1'
 
 // A static file cannot read the build config, so the base path is derived from
-// where this worker itself is served: /arn-c0de-dev/sw.js → /arn-c0de-dev/
+// where this worker itself is served: /website/sw.js → /website/
 const BASE = self.location.pathname.replace(/sw\.js$/, '')
 const START = BASE
 const SHELL = [BASE, BASE + 'manifest.webmanifest', BASE + 'icon.svg', BASE + 'arn-c0de.asc']

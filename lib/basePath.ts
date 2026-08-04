@@ -1,5 +1,5 @@
 /**
- * Path prefix the site is served under — "/arn-c0de-dev" on GitHub Pages,
+ * Path prefix the site is served under — "/website" on GitHub Pages,
  * empty on a custom domain. Set in next.config.mjs.
  *
  * Next rewrites its own generated URLs using `basePath`, but plain strings in
@@ -7,7 +7,7 @@
  */
 export const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 
-/** `asset('/icon.svg')` → `/arn-c0de-dev/icon.svg` */
+/** `asset('/icon.svg')` → `/website/icon.svg` */
 export function asset(path: string): string {
   return `${BASE_PATH}${path.startsWith('/') ? path : `/${path}`}`
 }

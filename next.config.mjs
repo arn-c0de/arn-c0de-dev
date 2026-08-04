@@ -1,6 +1,6 @@
 /**
- * The site is published from the project repo `arn-c0de-dev`, so GitHub Pages
- * serves it under https://arn-c0de.github.io/arn-c0de-dev/ rather than at a
+ * The site is published from the project repo `website`, so GitHub Pages
+ * serves it under https://arn-c0de.github.io/website/ rather than at a
  * domain root. Every asset, link and service-worker scope has to carry that
  * prefix.
  *
@@ -8,7 +8,7 @@
  *   PAGES_BASE_PATH=""            custom domain, or the arn-c0de.github.io repo
  *   PAGES_BASE_PATH="/other-name" a differently named project repo
  */
-const basePath = process.env.PAGES_BASE_PATH ?? '/arn-c0de-dev'
+const basePath = process.env.PAGES_BASE_PATH ?? '/website'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
