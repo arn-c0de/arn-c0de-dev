@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { loadReadme } from '@/lib/github'
 import { formatMonth, formatRelative, languageHue } from '@/lib/format'
 import type { Project } from '@/lib/types'
@@ -80,6 +80,50 @@ export default function ProjectPanel({
   const [imagesShown, setImagesShown] = useState(false)
   const closeRef = useRef<HTMLButtonElement>(null)
 
+  // Width is draggable via the grip on the left edge and remembered.
+  const [width, setWidth] = useState<number | null>(null)
+  const [dragging, setDragging] = useState(false)
+
+  useEffect(() => {
+    const stored = Number(localStorage.getItem('panel-width'))
+    if (stored) setWidth(clampWidth(stored))
+  }, [])
+
+  const clampWidth = (w: number) =>
+    Math.round(Math.min(Math.max(w, 400), Math.min(920, window.innerWidth - 72)))
+
+  const applyWidth = useCallback((w: number) => {
+    const clamped = clampWidth(w)
+    setWidth(clamped)
+    localStorage.setItem('panel-width', String(clamped))
+    return clamped
+  }, [])
+
+  function onGripPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    e.preventDefault()
+    e.currentTarget.setPointerCapture(e.pointerId)
+    setDragging(true)
+  }
+
+  function onGripPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (!e.currentTarget.hasPointerCapture(e.pointerId)) return
+    applyWidth(window.innerWidth - e.clientX)
+  }
+
+  function onGripPointerUp(e: React.PointerEvent<HTMLDivElement>) {
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId)
+    }
+    setDragging(false)
+  }
+
+  function onGripKeyDown(e: React.KeyboardEvent) {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+    e.preventDefault()
+    const current = width ?? Math.min(560, window.innerWidth)
+    applyWidth(current + (e.key === 'ArrowLeft' ? 32 : -32))
+  }
+
   useEffect(() => {
     const controller = new AbortController()
     setReadmeState('loading')
@@ -127,11 +171,25 @@ export default function ProjectPanel({
     <>
       <div className="scrim" onClick={onClose} />
       <aside
-        className="panel"
+        className={`panel${dragging ? ' panel--dragging' : ''}`}
+        style={width ? { width: `min(${width}px, 100vw)` } : undefined}
         role="dialog"
         aria-modal="true"
         aria-label={`${project.title} details`}
       >
+        <div
+          className="panel__grip"
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize panel"
+          tabIndex={0}
+          data-dragging={dragging}
+          onPointerDown={onGripPointerDown}
+          onPointerMove={onGripPointerMove}
+          onPointerUp={onGripPointerUp}
+          onPointerCancel={onGripPointerUp}
+          onKeyDown={onGripKeyDown}
+        />
         <header className="panel__head">
           <div style={{ flex: 1, minWidth: 0 }}>
             <h2 className="panel__title">{project.title}</h2>

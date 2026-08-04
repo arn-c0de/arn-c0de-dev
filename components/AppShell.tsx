@@ -6,14 +6,14 @@ import { loadProjects, snapshotProjects } from '@/lib/github'
 import type { DataSource, Project } from '@/lib/types'
 import { TABS, useAppState, type Tab } from '@/lib/useAppState'
 import AboutPane from './AboutPane'
-import CommandPalette from './CommandPalette'
 import ContactPane from './ContactPane'
 import ProjectPanel from './ProjectPanel'
 import ProjectsPane from './ProjectsPane'
 import RequestModal from './RequestModal'
 import StackPane from './StackPane'
 import ThemeToggle from './ThemeToggle'
-import { GitHubIcon, MailIcon, SearchIcon } from './Icons'
+import TopSearch from './TopSearch'
+import { GitHubIcon, MailIcon } from './Icons'
 
 const TAB_LABELS: Record<Tab, string> = {
   projects: 'Projects',
@@ -29,7 +29,6 @@ export default function AppShell() {
   const [projects, setProjects] = useState<Project[]>(snapshotProjects)
   const [source, setSource] = useState<DataSource>('snapshot')
   const [query, setQuery] = useState('')
-  const [paletteOpen, setPaletteOpen] = useState(false)
   const tabsRef = useRef<HTMLElement>(null)
   const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null)
 
@@ -74,24 +73,6 @@ export default function AppShell() {
     }
   }, [])
 
-  // ⌘K / Ctrl-K anywhere, and "/" when not already typing in a field.
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      const typing =
-        e.target instanceof HTMLElement &&
-        ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)
-      if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        setPaletteOpen((open) => !open)
-      } else if (e.key === '/' && !typing && !paletteOpen) {
-        e.preventDefault()
-        setPaletteOpen(true)
-      }
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [paletteOpen])
-
   const selected = useMemo(
     () => projects.find((p) => p.name === openProject) ?? null,
     [projects, openProject],
@@ -132,17 +113,12 @@ export default function AppShell() {
 
           <span className="topbar__spacer" />
 
-          <button
-            type="button"
-            className="iconbtn"
-            onClick={() => setPaletteOpen(true)}
-            aria-label="Open command palette"
-          >
-            <SearchIcon />
-            <span className="kbd" style={{ border: 0, background: 'none', padding: 0 }}>
-              ⌘K
-            </span>
-          </button>
+          <TopSearch
+            projects={projects}
+            onNavigate={(t) => navigate({ tab: t, project: null })}
+            onOpenProject={openDetail}
+            onStartRequest={() => startRequest()}
+          />
 
           <button type="button" className="btn btn--primary btn--sm" onClick={() => startRequest()}>
             <MailIcon />
@@ -249,16 +225,6 @@ export default function AppShell() {
           selected={requestFor}
           onSelectedChange={(names) => navigate({ requestFor: names })}
           onClose={() => navigate({ request: false })}
-        />
-      )}
-
-      {paletteOpen && (
-        <CommandPalette
-          projects={projects}
-          onClose={() => setPaletteOpen(false)}
-          onNavigate={(t) => navigate({ tab: t, project: null })}
-          onOpenProject={openDetail}
-          onStartRequest={() => startRequest()}
         />
       )}
     </div>

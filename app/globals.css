@@ -213,8 +213,8 @@ a:hover {
   padding: 0 20px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  height: 56px;
+  gap: 14px;
+  height: 52px;
 }
 
 .brand {
@@ -316,7 +316,7 @@ a:hover {
   appearance: none;
   background: none;
   border: 0;
-  padding: 11px 12px 13px;
+  padding: 9px 12px 11px;
   font-size: 14px;
   font-weight: 600;
   color: var(--text-muted);
@@ -362,7 +362,7 @@ a:hover {
   max-width: var(--shell-max);
   width: 100%;
   margin: 0 auto;
-  padding: 24px 20px 64px;
+  padding: 20px 20px 48px;
 }
 
 .pane {
@@ -377,18 +377,19 @@ a:hover {
 }
 
 .pane__head {
-  margin: 0 0 20px;
+  margin: 0 0 14px;
 }
 
 .pane__title {
-  margin: 0 0 6px;
-  font-size: 24px;
+  margin: 0 0 5px;
+  font-size: 21px;
   font-weight: 750;
   letter-spacing: -0.02em;
 }
 
 .pane__lede {
   margin: 0;
+  font-size: 14px;
   color: var(--text-muted);
   max-width: 62ch;
 }
@@ -400,8 +401,8 @@ a:hover {
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
-  margin-bottom: 18px;
-  padding-bottom: 18px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -487,7 +488,7 @@ a:hover {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .chip {
@@ -534,15 +535,15 @@ a:hover {
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(288px, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
 
 .card {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 16px;
+  gap: 9px;
+  padding: 14px;
   text-align: left;
   background: var(--bg-panel);
   border: 1px solid var(--border);
@@ -809,13 +810,78 @@ a:hover {
   }
 }
 
+/* While the panel itself slides in, its content follows in a short cascade. */
+.panel__body > * {
+  animation: rise 0.4s var(--ease) both;
+}
+
+.panel__body > :nth-child(1) {
+  animation-delay: 0.08s;
+}
+
+.panel__body > :nth-child(2) {
+  animation-delay: 0.13s;
+}
+
+.panel__body > :nth-child(3) {
+  animation-delay: 0.18s;
+}
+
+.panel__body > :nth-child(4) {
+  animation-delay: 0.23s;
+}
+
+.panel__body > :nth-child(n + 5) {
+  animation-delay: 0.28s;
+}
+
+/* Invisible drag strip on the left edge; the line lights up on hover. */
+.panel__grip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -5px;
+  width: 12px;
+  z-index: 2;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.panel__grip::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 5px;
+  width: 2px;
+  border-radius: 2px;
+  background: transparent;
+  transition: background 0.15s;
+}
+
+.panel__grip:hover::after,
+.panel__grip:focus-visible::after,
+.panel__grip[data-dragging='true']::after {
+  background: var(--accent);
+}
+
+.panel--dragging {
+  user-select: none;
+}
+
+.panel--dragging .panel__body {
+  pointer-events: none;
+}
+
 @media (max-width: 640px) {
   .panel {
     top: 44px;
-    width: 100vw;
+    width: 100vw !important;
     border-left: 0;
     border-top: 1px solid var(--border);
     border-radius: var(--radius) var(--radius) 0 0;
+  }
+
+  .panel__grip {
+    display: none;
   }
 
   @keyframes slide {
@@ -827,7 +893,7 @@ a:hover {
 }
 
 .panel__head {
-  padding: 18px 20px 14px;
+  padding: 14px 16px 12px;
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: flex-start;
@@ -851,11 +917,11 @@ a:hover {
   flex: 1;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 18px 20px 32px;
+  padding: 14px 16px 26px;
 }
 
 .panel__section {
-  margin-bottom: 22px;
+  margin-bottom: 16px;
 }
 
 .panel__label {
@@ -880,7 +946,7 @@ a:hover {
 }
 
 .stat {
-  padding: 10px 12px;
+  padding: 8px 11px;
   background: var(--bg-inset);
   border-radius: var(--radius-sm);
 }
@@ -997,16 +1063,59 @@ a:hover {
   margin: 18px 0;
 }
 
-/* ── Command palette ────────────────────────────────────────────────────── */
+/* ── Topbar search ──────────────────────────────────────────────────────── */
 
-.palette {
-  position: fixed;
-  z-index: 61;
-  top: 12vh;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(560px, calc(100vw - 32px));
-  max-height: 60vh;
+/* A button that expands into an inline input sliding out to the left, with
+   results in a dropdown anchored below — replaces the old modal palette. */
+.tsearch {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.tsearch__input {
+  width: 0;
+  height: 32px;
+  padding: 0;
+  margin-right: 0;
+  opacity: 0;
+  background: var(--bg-panel);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  transition: width 0.3s var(--ease-snap), opacity 0.2s, padding 0.3s var(--ease-snap),
+    margin 0.3s var(--ease-snap), border-color 0.15s, box-shadow 0.15s;
+}
+
+.tsearch--open .tsearch__input {
+  width: min(340px, calc(100vw - 220px));
+  padding: 0 11px;
+  margin-right: 6px;
+  opacity: 1;
+  border-color: var(--border-strong);
+}
+
+.tsearch__input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.tsearch__input::placeholder {
+  color: var(--text-faint);
+}
+
+.tsearch--open .tsearch__toggle {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+
+.tsearch__drop {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(440px, calc(100vw - 28px));
+  max-height: min(480px, 70vh);
   display: flex;
   flex-direction: column;
   background: var(--bg-panel);
@@ -1014,34 +1123,22 @@ a:hover {
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
-  animation: pop 0.22s var(--ease-snap);
+  animation: drop-in 0.22s var(--ease-snap);
 }
 
-@keyframes pop {
+@keyframes drop-in {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(-8px) scale(0.97);
+    transform: translateY(-8px) scale(0.98);
   }
-}
-
-.palette__input {
-  width: 100%;
-  height: 48px;
-  padding: 0 16px;
-  background: none;
-  border: 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 15px;
-}
-
-.palette__input:focus {
-  outline: none;
 }
 
 .palette__list {
   list-style: none;
   margin: 0;
   padding: 6px;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -1073,9 +1170,19 @@ a:hover {
   background: var(--bg-hover);
 }
 
+/* Name stays on one line; the description truncates after it. */
+.palette__item > span:first-child {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+}
+
 .palette__item-name {
   font-weight: 600;
   font-size: 14px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .palette__item-desc {
@@ -1116,8 +1223,8 @@ a:hover {
 .metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  padding: 5px;
-  margin-bottom: 24px;
+  padding: 4px;
+  margin-bottom: 16px;
   background: var(--bg-panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -1160,7 +1267,7 @@ a:hover {
 
 .bar__row {
   min-width: 0;
-  padding: 10px 12px 11px;
+  padding: 8px 11px 9px;
   background: var(--bg-panel);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -1243,8 +1350,8 @@ a:hover {
 
 .domain-card {
   min-width: 0;
-  min-height: 42px;
-  padding: 8px 9px 8px 12px;
+  min-height: 38px;
+  padding: 6px 8px 6px 11px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1318,11 +1425,11 @@ a:hover {
 }
 
 .section {
-  margin-bottom: 32px;
+  margin-bottom: 22px;
 }
 
 .section__title {
-  margin: 0 0 12px;
+  margin: 0 0 9px;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -1331,7 +1438,7 @@ a:hover {
 }
 
 .stack-pane .section {
-  margin-bottom: 24px;
+  margin-bottom: 18px;
 }
 
 /* ── Prose panes (about / contact) ──────────────────────────────────────── */
@@ -1341,7 +1448,7 @@ a:hover {
 }
 
 .prose p {
-  margin: 0 0 14px;
+  margin: 0 0 11px;
   color: var(--text-muted);
 }
 
@@ -1353,11 +1460,11 @@ a:hover {
 .cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
 
 .infocard {
-  padding: 16px;
+  padding: 13px 14px;
   background: var(--bg-panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -1405,7 +1512,7 @@ a:hover {
   margin: 0;
   display: grid;
   grid-template-columns: minmax(88px, auto) 1fr;
-  gap: 8px 16px;
+  gap: 6px 14px;
   font-size: 13.5px;
 }
 
@@ -2042,7 +2149,7 @@ textarea.input--sm {
 
 .footer {
   border-top: 1px solid var(--border);
-  padding: 18px 20px 28px;
+  padding: 14px 20px 20px;
 }
 
 .footer__row {
