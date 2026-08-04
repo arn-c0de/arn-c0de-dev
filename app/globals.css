@@ -1515,7 +1515,7 @@ a:hover {
   left: 50%;
   transform: translate(-50%, -50%);
   width: min(920px, calc(100vw - 32px));
-  max-height: min(760px, calc(100dvh - 48px));
+  max-height: min(780px, calc(100dvh - 48px));
   display: flex;
   flex-direction: column;
   background: var(--bg-panel);
@@ -1567,7 +1567,7 @@ a:hover {
 }
 
 .modal__form {
-  padding: 14px 16px 18px;
+  padding: 14px 16px 14px;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -1587,7 +1587,7 @@ a:hover {
 
 .fset {
   display: block;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .fset:last-child {
@@ -1655,7 +1655,7 @@ a:hover {
 
 textarea.input--sm {
   height: auto;
-  min-height: 84px;
+  min-height: 64px;
 }
 
 .select--sm {

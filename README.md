@@ -101,11 +101,12 @@ gh workflow run deploy.yml --ref main
 
 The repository must be public for Pages to publish on a free account.
 
-## The request tab
+## The request modal
 
 Visitors pick what their message is about — a request type, one or more topic areas, any projects
 they added via *Ask about this* in a project panel — and get a finished email they only have to
-send. There is no backend: the draft is built in the browser and handed to their own mail client
+send. It opens from the *Request* button in the top bar, from a project panel, or from the command
+palette, and shows the live draft next to the form. There is no backend: the draft is built in the browser and handed to their own mail client
 through a `mailto:` link, with *Copy draft* as the fallback when no client is configured.
 
 The wording is deliberately neutral. There is no budget field, no rates and no "commissioned work"
@@ -123,7 +124,8 @@ MAILTO_LIMIT    // above this the UI steers people to Copy draft instead
 ```
 
 `buildBody()` in the same file is the email template. Request state lives in the URL
-(`?tab=request&for=Crawllama,GPG-Meister`), so a prepared request is a shareable link.
+(`?request=1&for=Crawllama,GPG-Meister`), so a prepared request is a shareable link. The older
+`?tab=request` form of that link still opens the modal.
 
 ## Contact and keys
 

@@ -11,10 +11,12 @@ const EMAIL = 'arn-c0de@protonmail.com'
 const FINGERPRINT = '93A7 8377 0EEA FFA4 3B24  22F1 A0F9 A2E7 0D64 2ADC'
 
 const SUITABLE_FOR = [
-  'vulnerability reports',
-  'responsible disclosure',
-  'whistleblowing',
-  'other security-critical or confidential matters',
+  'questions about one of my projects',
+  'help getting something set up',
+  'bugs or security findings',
+  'an idea you would like built',
+  'working on something together',
+  'anything confidential',
 ]
 
 function CopyButton({ value, label }: { value: string; label: string }) {
@@ -44,8 +46,9 @@ export default function ContactPane() {
       <div className="pane__head">
         <h1 className="pane__title">Get in touch</h1>
         <p className="pane__lede">
-          Need to share something sensitive? You can reach me through SimpleX or send an encrypted
-          email with the PGP key below.
+          Questions about my projects, something you would like built, or a bug you ran into — all
+          welcome here. Reach me through SimpleX or by email, and use the PGP key below if what you
+          are sending should stay private.
         </p>
       </div>
 
