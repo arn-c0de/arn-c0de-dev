@@ -1,8 +1,18 @@
 import config from '@/projects.config'
 import snapshot from '@/data/repos.json'
+import repoIcons from '@/data/repo-icons.json'
+import { asset } from './basePath'
 import type { DataSource, GitHubRepo, Project, SortKey } from './types'
 
 const API = 'https://api.github.com'
+
+const ICONS = new Set(repoIcons as string[])
+
+/** Matches the slug `scripts/generate-repo-icons.mjs` writes the files under. */
+function iconFor(name: string): string | null {
+  const key = name.toLowerCase().replace(/[^a-z0-9]/g, '')
+  return ICONS.has(key) ? asset(`/repo-icons/${key}.png`) : null
+}
 
 /** GitHub descriptions often carry stray double spaces and newlines. */
 function tidy(text: string | null | undefined): string {
@@ -28,6 +38,7 @@ function toProject(repo: GitHubRepo): Project {
     category: override.category ?? inferCategory(repo),
     featured: featuredIndex !== -1,
     links: override.links ?? [],
+    icon: iconFor(repo.name),
   }
 }
 

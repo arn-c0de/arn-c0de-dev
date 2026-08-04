@@ -124,6 +124,23 @@ export function MailIcon() {
   )
 }
 
+export function RequestIcon() {
+  return (
+    <svg {...base} width={15} height={15}>
+      <path d="M3.2 2.5h9.6a1.7 1.7 0 0 1 1.7 1.7v6a1.7 1.7 0 0 1-1.7 1.7H7.2L4 14v-2.1h-.8a1.7 1.7 0 0 1-1.7-1.7v-6a1.7 1.7 0 0 1 1.7-1.7Z" />
+      <path d="M5 6h6M5 8.5h4" />
+    </svg>
+  )
+}
+
+export function SendIcon() {
+  return (
+    <svg {...base} width={15} height={15}>
+      <path d="m2 2.5 12 5.3L2 13.5l1.4-4.4L10 7.8 3.4 6.6Z" />
+    </svg>
+  )
+}
+
 /**
  * Small, locally drawn language marks for the Stack pane. They deliberately
  * share one badge shape so the mixed toolchain reads as a coherent set rather

@@ -35,10 +35,18 @@ await sharp({ create: { width: 512, height: 512, channels: 4, background: '#0a0c
   .png({ compressionLevel: 9 })
   .toFile(p('public/icon-maskable.png'))
 
-// Shown in the top bar at 26px, so 96px covers 2x and 3x displays.
+// Shown in the top bar at 26px and in the overview hero at 60px, so 96px
+// covers 2x and 3x on the one and 1.6x on the other.
 await sharp(src)
   .resize(96, 96, { fit: 'cover' })
   .jpeg({ quality: 88, mozjpeg: true })
   .toFile(p('public/avatar.jpg'))
+
+// The about page shows the portrait at 112px; this is the source at full
+// resolution, which covers well past 3x.
+await sharp(src)
+  .resize(400, 400, { fit: 'cover' })
+  .jpeg({ quality: 90, mozjpeg: true })
+  .toFile(p('public/avatar-large.jpg'))
 
 console.log('icons regenerated from', src)

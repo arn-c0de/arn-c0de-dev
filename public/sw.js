@@ -1,66 +1,28 @@
 /**
- * Offline shell for the project console.
+ * Tombstone — the site no longer ships an offline cache.
  *
- * Same-origin assets are cached on first use and served from cache afterwards;
- * navigations try the network first so a deploy is picked up immediately, and
- * fall back to the cached page when offline. Requests to api.github.com are
- * never cached — the app already ships a repo snapshot for that case.
+ * The old worker held every asset under one cache name that never changed
+ * between deploys, so a visitor could end up with a half-updated app and no
+ * way to recover from inside the page. A static site loads fast enough
+ * without it, and the repo snapshot already covers a rate-limited API.
+ *
+ * The file has to stay: a browser that still holds the old registration
+ * fetches this path when it checks for an update, and only then can the
+ * caches be cleared and the registration dropped. Safe to delete once no
+ * client can plausibly still be carrying the previous worker.
  */
 
-const CACHE = 'arn-c0de-v1'
-
-// A static file cannot read the build config, so the base path is derived from
-// where this worker itself is served: /website/sw.js → /website/
-const BASE = self.location.pathname.replace(/sw\.js$/, '')
-const START = BASE
-const SHELL = [BASE, BASE + 'manifest.webmanifest', BASE + 'icon.svg', BASE + 'arn-c0de.asc']
-
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()),
-  )
-})
+self.addEventListener('install', () => self.skipWaiting())
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches
-      .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim()),
-  )
-})
-
-self.addEventListener('fetch', (event) => {
-  const { request } = event
-  if (request.method !== 'GET') return
-
-  const url = new URL(request.url)
-  if (url.origin !== self.location.origin) return
-
-  if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const copy = response.clone()
-          caches.open(CACHE).then((cache) => cache.put(START, copy))
-          return response
-        })
-        .catch(() => caches.match(START).then((cached) => cached || Response.error())),
-    )
-    return
-  }
-
-  event.respondWith(
-    caches.match(request).then(
-      (cached) =>
-        cached ||
-        fetch(request).then((response) => {
-          if (response.ok && response.type === 'basic') {
-            const copy = response.clone()
-            caches.open(CACHE).then((cache) => cache.put(request, copy))
-          }
-          return response
-        }),
-    ),
+    (async () => {
+      const keys = await caches.keys()
+      await Promise.all(keys.map((key) => caches.delete(key)))
+      await self.registration.unregister()
+      // Reload the open tabs so they leave the worker behind straight away.
+      const clients = await self.clients.matchAll({ type: 'window' })
+      for (const client of clients) client.navigate(client.url)
+    })(),
   )
 })

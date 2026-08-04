@@ -67,13 +67,15 @@ npm run build      # static output in out/
 npm run preview    # build without the sub-path and serve it at localhost root
 ```
 
-The service worker is skipped over plain HTTP, so `npm run dev` never serves stale cached assets.
+There is no service worker and nothing is cached offline. `public/sw.js` is only a tombstone that
+clears the caches of the worker this site used to register and then unregisters itself; it can go
+once no visitor can still be carrying that worker.
 
 ### The base path
 
 This is a *project* repo, so Pages serves it from `/website/` rather than a domain root.
 `next.config.mjs` sets `basePath` accordingly, and `lib/basePath.ts` exposes `asset()` for the
-handful of raw URL strings Next does not rewrite itself (manifest, icons, service worker, the
+handful of raw URL strings Next does not rewrite itself (manifest, icons, the
 `.asc` download). Change it in one place when the hosting changes:
 
 ```bash

@@ -14,7 +14,7 @@ import RequestModal from './RequestModal'
 import StackPane from './StackPane'
 import ThemeToggle from './ThemeToggle'
 import TopSearch from './TopSearch'
-import { GitHubIcon, MailIcon } from './Icons'
+import { GitHubIcon, RequestIcon } from './Icons'
 
 const TAB_LABELS: Record<Tab, string> = {
   overview: 'Overview',
@@ -59,20 +59,6 @@ export default function AppShell() {
       setSource('live')
     })
     return () => controller.abort()
-  }, [])
-
-  // Offline shell. Registered after load so it never competes with first paint.
-  useEffect(() => {
-    if (!('serviceWorker' in navigator) || location.protocol === 'http:') return
-    const register = () =>
-      navigator.serviceWorker
-        .register(asset('/sw.js'), { scope: asset('/') })
-        .catch(() => {})
-    if (document.readyState === 'complete') register()
-    else {
-      window.addEventListener('load', register, { once: true })
-      return () => window.removeEventListener('load', register)
-    }
   }, [])
 
   const selected = useMemo(
@@ -124,8 +110,8 @@ export default function AppShell() {
             onStartRequest={() => startRequest()}
           />
 
-          <button type="button" className="btn btn--primary btn--sm" onClick={() => startRequest()}>
-            <MailIcon />
+          <button type="button" className="btn btn--request btn--sm" onClick={() => startRequest()}>
+            <RequestIcon />
             Request
           </button>
 
@@ -184,8 +170,10 @@ export default function AppShell() {
           />
         )}
         {tab === 'stack' && <StackPane projects={projects} onTopicSelect={showTopic} />}
-        {tab === 'about' && <AboutPane projects={projects} />}
-        {tab === 'contact' && <ContactPane />}
+        {tab === 'about' && (
+          <AboutPane projects={projects} onStartRequest={() => startRequest()} />
+        )}
+        {tab === 'contact' && <ContactPane onStartRequest={() => startRequest()} />}
       </main>
 
       <footer className="footer">
@@ -208,8 +196,8 @@ export default function AppShell() {
             <p>
               This site sets no cookies and runs no analytics or tracking of any kind. Fonts,
               icons and styles are served from this domain — there is no CDN and no third-party
-              script. The only things kept in your browser are your chosen colour theme and an
-              offline copy of the page assets, both of which clearing site data removes.
+              script, and nothing is stored offline. The only thing kept in your browser is your
+              chosen colour theme, which clearing site data removes.
             </p>
             <p>
               The one request made automatically is to <span className="mono">api.github.com</span>{' '}

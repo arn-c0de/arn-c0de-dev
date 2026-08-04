@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { loadReadme } from '@/lib/github'
 import { formatMonth, formatRelative, languageHue } from '@/lib/format'
 import type { Project } from '@/lib/types'
-import { CloseIcon, GitHubIcon, LinkIcon, MailIcon } from './Icons'
+import { CloseIcon, GitHubIcon, LinkIcon, RequestIcon } from './Icons'
 
 /**
  * GitHub already sanitises the HTML it renders, but this runs it through the
@@ -191,6 +191,9 @@ export default function ProjectPanel({
           onKeyDown={onGripKeyDown}
         />
         <header className="panel__head">
+          {project.icon && (
+            <img className="panel__icon" src={project.icon} alt="" width={36} height={36} />
+          )}
           <div style={{ flex: 1, minWidth: 0 }}>
             <h2 className="panel__title">{project.title}</h2>
             <p className="panel__sub">
@@ -213,8 +216,8 @@ export default function ProjectPanel({
 
           <section className="panel__section">
             <div className="panel__actions">
-              <button type="button" className="btn btn--primary" onClick={() => onRequest(project.name)}>
-                <MailIcon />
+              <button type="button" className="btn btn--request" onClick={() => onRequest(project.name)}>
+                <RequestIcon />
                 Ask about this
               </button>
               {links.map((link) => (

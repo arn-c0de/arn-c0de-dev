@@ -22,10 +22,14 @@
   --text: #14161f;
   --text-muted: #5c6379;
   --text-faint: #8b92a7;
-  --accent: #4f46e5;
-  --accent-2: #7c5cfa;
-  --accent-soft: #e9e8fc;
+  --accent: #2563eb;
+  --accent-2: #1e40af;
+  --accent-soft: #e7efff;
   --accent-text: #ffffff;
+  --request: #1e3a5f;
+  --request-hover: #172f4f;
+  --request-soft: #e7edf5;
+  --request-text: #ffffff;
   --star: #b8860b;
   --grid-line: rgba(28, 32, 68, 0.05);
   --shadow-sm: 0 1px 2px rgba(18, 20, 45, 0.06);
@@ -45,10 +49,14 @@
     --text: #e8eaf3;
     --text-muted: #9aa3ba;
     --text-faint: #6b7390;
-    --accent: #8b93ff;
-    --accent-2: #b39dff;
-    --accent-soft: #1c2040;
-    --accent-text: #0a0b11;
+    --accent: #78aaff;
+    --accent-2: #4f83c2;
+    --accent-soft: #17243d;
+    --accent-text: #07111f;
+    --request: #315f8f;
+    --request-hover: #3b6fa5;
+    --request-soft: #15263a;
+    --request-text: #ffffff;
     --star: #e3b341;
     --grid-line: rgba(150, 160, 255, 0.055);
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
@@ -68,10 +76,14 @@
   --text: #e8eaf3;
   --text-muted: #9aa3ba;
   --text-faint: #6b7390;
-  --accent: #8b93ff;
-  --accent-2: #b39dff;
-  --accent-soft: #1c2040;
-  --accent-text: #0a0b11;
+  --accent: #78aaff;
+  --accent-2: #4f83c2;
+  --accent-soft: #17243d;
+  --accent-text: #07111f;
+  --request: #315f8f;
+  --request-hover: #3b6fa5;
+  --request-soft: #15263a;
+  --request-text: #ffffff;
   --star: #e3b341;
   --grid-line: rgba(150, 160, 255, 0.055);
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
@@ -550,7 +562,7 @@ a:hover {
 }
 
 .gallery__slide {
-  flex: 0 0 clamp(240px, 30%, 300px);
+  flex: 0 0 clamp(268px, 31%, 320px);
   scroll-snap-align: start;
   display: flex;
 }
@@ -807,22 +819,26 @@ a:hover {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(288px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 10px;
 }
 
+/* One card shape for the grid and the overview gallery. Four fixed rows —
+   head, description, tags, foot — so a row of cards lines up on every band
+   instead of only on the outer edges. */
 .card {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 9px;
-  padding: 14px;
+  gap: 10px;
+  padding: 15px 16px 13px;
   text-align: left;
   background: var(--bg-panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
+  overflow: hidden;
   transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
   /* Cards fade in with a slight stagger; --i is set per card from JS. */
   animation: card-in 0.4s var(--ease) both;
@@ -846,67 +862,139 @@ a:hover {
   transform: translateY(-1px);
 }
 
+/* A hairline along the top edge instead of the old notched badge — it marks
+   the card without pushing anything out of alignment. */
 .card--featured {
-  border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
 }
 
-.card__top {
+.card--featured::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+
+.card__head {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
+  align-items: center;
+  gap: 9px;
+}
+
+/* Only projects that actually have artwork carry one, so the row has to look
+   right with and without it. */
+.card__icon {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  border-radius: 7px;
+  object-fit: contain;
+  background: var(--bg-inset);
 }
 
 .card__title {
+  flex: 1;
+  min-width: 0;
   margin: 0;
   font-size: 15.5px;
   font-weight: 700;
   letter-spacing: -0.01em;
   line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.card__stars {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--font-mono);
-  font-size: 14px;
-  font-weight: 650;
-  color: var(--text);
-  flex-shrink: 0;
+.card__flag {
+  flex: 0 0 auto;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-soft);
 }
 
-.card__stars svg {
-  width: 16px;
-  height: 16px;
-  color: var(--star);
-}
-
+/* Two lines, always — reserved even when the repo has no description, so the
+   tags and the foot start at the same height on every card. */
 .card__desc {
   margin: 0;
   font-size: 13.5px;
   color: var(--text-muted);
   line-height: 1.5;
+  height: calc(2 * 1.5em);
   display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.card__foot {
-  margin-top: auto;
-  padding-top: 6px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 13.5px;
-  color: var(--text-muted);
+.tagrow--card {
+  min-height: 19px;
 }
 
-.card__foot svg {
-  width: 15px;
-  height: 15px;
+.card__foot {
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 12.5px;
+  color: var(--text-faint);
+}
+
+.card__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 550;
+  white-space: nowrap;
+}
+
+.card__stat svg {
+  width: 13px;
+  height: 13px;
+}
+
+.card__stat:first-child svg {
+  color: var(--star);
+}
+
+/* Small enough to read as a marker beside the language name rather than as an
+   emblem for the repository. */
+.card__stat--lang .language-logo {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.card__when {
+  margin-left: auto;
+  padding-left: 6px;
+  white-space: nowrap;
+}
+
+/* The arrow only takes up room once the card is hovered, so the foot reads as
+   metadata rather than as a control. */
+.card__go {
+  flex: 0 0 auto;
+  display: inline-flex;
+  width: 0;
+  opacity: 0;
+  color: var(--accent);
+  transition: width 0.2s var(--ease), opacity 0.2s var(--ease), margin 0.2s var(--ease);
+}
+
+.card:hover .card__go,
+.card:focus-visible .card__go {
+  width: 14px;
+  margin-left: 7px;
+  opacity: 1;
 }
 
 .lang {
@@ -923,20 +1011,6 @@ a:hover {
   border-radius: 50%;
   background: hsl(var(--hue) 65% 55%);
   flex-shrink: 0;
-}
-
-.card__badge {
-  position: absolute;
-  top: -1px;
-  right: 14px;
-  padding: 2px 7px 3px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--accent-text);
-  background: var(--accent);
-  border-radius: 0 0 5px 5px;
 }
 
 .tagrow {
@@ -957,6 +1031,22 @@ a:hover {
 
 .tag--more {
   color: var(--text-faint);
+}
+
+.tag--language {
+  padding-left: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.tag--language .language-logo {
+  width: 16px;
+  height: 16px;
+}
+
+.tag--language .tag__n {
+  margin-left: 0;
 }
 
 /* ── States ─────────────────────────────────────────────────────────────── */
@@ -1026,15 +1116,33 @@ a:hover {
 }
 
 .btn--primary {
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  border-color: transparent;
+  background: var(--accent);
+  border-color: var(--accent);
   color: var(--accent-text);
 }
 
 .btn--primary:hover {
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  filter: brightness(1.06);
-  box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent);
+  background: color-mix(in srgb, var(--accent) 88%, var(--text));
+  border-color: color-mix(in srgb, var(--accent) 88%, var(--text));
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+.btn--request {
+  background: var(--request);
+  border-color: var(--request);
+  color: var(--request-text);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--request) 24%, transparent);
+}
+
+.btn--request:hover {
+  background: var(--request-hover);
+  border-color: var(--request-hover);
+  color: var(--request-text);
+  box-shadow: 0 5px 14px color-mix(in srgb, var(--request) 24%, transparent);
+}
+
+.btn--request svg {
+  stroke-width: 1.75;
 }
 
 .showall {
@@ -1171,6 +1279,15 @@ a:hover {
   display: flex;
   align-items: flex-start;
   gap: 12px;
+}
+
+.panel__icon {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  border-radius: 9px;
+  object-fit: contain;
+  background: var(--bg-inset);
 }
 
 .panel__title {
@@ -1728,55 +1845,423 @@ a:hover {
   font-weight: 650;
 }
 
-.cards {
+
+/* ── About pane ─────────────────────────────────────────────────────────── */
+
+/* Trained for / available for. Two equal columns so neither reads as the
+   footnote of the other; the freelance side carries the accent because it is
+   the one a visitor can act on. */
+.roles {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 10px;
+  margin-bottom: 22px;
 }
 
-.infocard {
-  padding: 13px 14px;
+.role {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 15px 16px;
   background: var(--bg-panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
+  box-shadow: var(--shadow-sm);
 }
 
-.infocard:hover {
-  border-color: var(--border-strong);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+.role--lead {
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+  background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--accent) 6%, transparent),
+      transparent 60%
+    ),
+    var(--bg-panel);
 }
 
-.infocard h3 {
-  margin: 0 0 6px;
-  font-size: 14.5px;
+.role__tag {
+  width: fit-content;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--bg-inset);
+  font-size: 10.5px;
   font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
 }
 
-.infocard p {
+.role__tag--lead {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.role__title {
+  margin: 2px 0 0;
+  font-size: 15.5px;
+  font-weight: 720;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+.role__text {
   margin: 0;
   font-size: 13.5px;
   color: var(--text-muted);
 }
 
-.prompt {
-  padding: 14px 16px;
-  margin-bottom: 24px;
-  background: var(--bg-inset);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-family: var(--font-mono);
-  font-size: 12.5px;
-  line-height: 1.7;
-  color: var(--text-muted);
-  overflow-x: auto;
-  white-space: pre;
+.role__actions {
+  margin-top: auto;
+  padding-top: 8px;
 }
 
-.prompt b {
-  color: var(--text);
-  font-weight: 500;
+/* The text keeps its column; the facts sit alongside instead of pushing the
+   reading down the page. */
+/* Profile header: the portrait carries the introduction, so it is allowed to
+   be large. Sits on the page rather than in a card, which keeps it clearly
+   apart from the bands below. */
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile__avatar {
+  width: 112px;
+  height: 112px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  background: var(--bg-inset);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 11%, transparent), var(--shadow-md);
+}
+
+.profile__text {
+  min-width: 0;
+}
+
+.profile__name {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 780;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+
+.profile__role {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Marks the line as the present state rather than a career summary. */
+.profile__now {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.profile__lede {
+  margin: 9px 0 0;
+  max-width: 58ch;
+  font-size: 14.5px;
+  color: var(--text-muted);
+}
+
+.profile__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 12px;
+}
+
+@media (max-width: 560px) {
+  .profile {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .profile__avatar {
+    width: 88px;
+    height: 88px;
+  }
+
+  .profile__name {
+    font-size: 25px;
+  }
+}
+
+/* Every block on this page is a band, so the spacing between them is the
+   page's only rhythm. */
+.about {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.about .band {
+  margin: 0;
+}
+
+/* The prose keeps the slab's two-column split: reading on the left, the way
+   to reach me on the right. */
+.slab--prose {
+  align-items: start;
+}
+
+.slab--prose .prose {
+  max-width: 64ch;
+}
+
+.slab--prose .prose p:last-child {
+  margin-bottom: 0;
+}
+
+.slab__note {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text-faint);
+}
+
+.slab__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+/* One hairline grid instead of five stacked boxes — the borders come from the
+   gap, so the columns stay flush however many there are. */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.fact {
+  padding: 13px 14px 14px;
+  background: var(--bg-panel);
+}
+
+.fact .section__title {
+  margin-bottom: 8px;
+}
+
+.fact__note {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--text-faint);
+}
+
+/* Numbered rows in one panel rather than four boxes: same two-column rhythm
+   as the overview slabs, and it reads in half the height. */
+.principles {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 2px 15px;
+}
+
+.principle {
+  display: grid;
+  grid-template-columns: minmax(0, 210px) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 4px 18px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.principle:last-child {
+  border-bottom: 0;
+}
+
+.principle__title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.principle__n {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.principle__body {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+@media (max-width: 760px) {
+  .principle {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+}
+
+/* ── Contact pane ───────────────────────────────────────────────────────── */
+
+.channels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 10px;
+  margin-bottom: 26px;
+}
+
+.channel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 15px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
+}
+
+.channel:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* A channel that cannot be used should not compete with the two that can. */
+.channel--muted {
+  background: var(--bg-inset);
+  box-shadow: none;
+}
+
+.channel--muted:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--border);
+}
+
+.channel__head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.channel__name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 720;
+  letter-spacing: -0.01em;
+}
+
+.channel__text {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+.channel__actions {
+  margin-top: auto;
+  padding-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.pill--quiet {
+  color: var(--text-faint);
+  background: var(--bg-inset);
+  border-color: var(--border);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.key {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 15px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+/* The fingerprint is the one value people actually compare, so it gets the
+   room to be read in one go. */
+.key__print {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px 13px;
+  background: var(--bg-inset);
+  border-radius: var(--radius-sm);
+  overflow-x: auto;
+}
+
+.key__label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.key__value {
+  font-size: 13.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.keyfold summary {
+  width: fit-content;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.keyfold .keyblock {
+  margin-top: 10px;
 }
 
 .deflist {
@@ -2002,6 +2487,10 @@ a:hover {
 /* ── Request modal ──────────────────────────────────────────────────────── */
 
 .modal {
+  --accent: var(--request);
+  --accent-2: var(--request);
+  --accent-soft: var(--request-soft);
+  --accent-text: var(--request-text);
   position: fixed;
   z-index: 56;
   top: 50%;
@@ -2028,7 +2517,7 @@ a:hover {
 
 .modal__head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
   padding: 14px 16px;
   border-bottom: 1px solid var(--border);
@@ -2047,9 +2536,27 @@ a:hover {
   color: var(--text-muted);
 }
 
-.modal__head > div:first-child {
+.modal__heading {
   flex: 1;
   min-width: 0;
+}
+
+.modal__mark {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  color: var(--request);
+  background: var(--request-soft);
+  border: 1px solid color-mix(in srgb, var(--request) 24%, var(--border));
+  border-radius: 10px;
+}
+
+.modal__mark svg {
+  width: 17px;
+  height: 17px;
+  stroke-width: 1.75;
 }
 
 .modal__cols {

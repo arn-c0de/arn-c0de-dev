@@ -6,7 +6,7 @@ import { formatRelative } from '@/lib/format'
 import type { Project } from '@/lib/types'
 import type { Tab } from '@/lib/useAppState'
 import ProjectCard from './ProjectCard'
-import { ArrowIcon, ChevronIcon, GitHubIcon, MailIcon } from './Icons'
+import { ArrowIcon, ChevronIcon, GitHubIcon, LanguageIcon, RequestIcon } from './Icons'
 
 /** Languages named in the stack tile — a taste, not the full list. */
 const TOP_LANGUAGES = 4
@@ -60,17 +60,18 @@ export default function OverviewPane({
         <div className="hero__text">
           <h1 className="hero__name">arn-c0de</h1>
           <p className="hero__role">
-            Embedded firmware · local AI · network &amp; security tooling · Android
+            Embedded firmware · local AI · network &amp; security tooling · backends · web apps ·
+            Android
           </p>
           <p className="hero__lede">
             I build things close to the hardware, and tools that make complicated systems easier to
-            understand. Everything runs locally where it can, the code is public, and your data
-            stays on your device.
+            understand. Every one of them is a public repository with the setup written down — pick
+            one below, or tell me what you are trying to build.
           </p>
 
           <div className="hero__actions">
-            <button type="button" className="btn btn--primary" onClick={onStartRequest}>
-              <MailIcon />
+            <button type="button" className="btn btn--request" onClick={onStartRequest}>
+              <RequestIcon />
               Start a request
             </button>
             <button type="button" className="btn" onClick={() => onNavigate('projects')}>
@@ -127,7 +128,8 @@ export default function OverviewPane({
             onAction={() => onNavigate('stack')}
           >
             {stats.languages.slice(0, TOP_LANGUAGES).map(([name, count]) => (
-              <span key={name} className="tag">
+              <span key={name} className="tag tag--language">
+                <LanguageIcon language={name} size={16} />
                 {name}
                 <span className="tag__n">{count}</span>
               </span>

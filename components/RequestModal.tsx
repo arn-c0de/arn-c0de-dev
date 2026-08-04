@@ -17,7 +17,7 @@ import {
 } from '@/lib/request'
 import type { Project } from '@/lib/types'
 import SearchPicker, { type PickerItem } from './SearchPicker'
-import { CheckIcon, CloseIcon, CopyIcon } from './Icons'
+import { CheckIcon, CloseIcon, CopyIcon, RequestIcon, SendIcon } from './Icons'
 
 /** One labelled row. Every control in the form sits in one of these. */
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -124,7 +124,10 @@ export default function RequestModal({
       <div className="scrim" style={{ zIndex: 55 }} onClick={onClose} />
       <div className="modal" role="dialog" aria-modal="true" aria-label="Start a request">
         <header className="modal__head">
-          <div>
+          <span className="modal__mark" aria-hidden>
+            <RequestIcon />
+          </span>
+          <div className="modal__heading">
             <h2 className="modal__title">Start a request</h2>
             <p className="modal__sub">
               Pick what it is about — you get a finished email to send yourself.
@@ -259,7 +262,7 @@ export default function RequestModal({
               {copied ? 'Copied' : 'Copy draft'}
             </button>
             <a
-              className={`btn btn--primary${ready ? '' : ' btn--disabled'}`}
+              className={`btn btn--request${ready ? '' : ' btn--disabled'}`}
               href={ready ? mailto : undefined}
               aria-disabled={!ready}
               onClick={(e) => {
@@ -269,6 +272,7 @@ export default function RequestModal({
                 }
               }}
             >
+              <SendIcon />
               Open in email app
             </a>
           </div>

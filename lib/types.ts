@@ -26,6 +26,11 @@ export interface Project extends GitHubRepo {
   featured: boolean
   /** Extra links beyond the repo itself. */
   links: { label: string; href: string }[]
+  /**
+   * Path to the project's own icon, or null when it has none. Filled in from
+   * `data/repo-icons.json`, which `scripts/generate-repo-icons.mjs` writes.
+   */
+  icon: string | null
 }
 
 export type SortKey = 'featured' | 'stars' | 'updated' | 'name'
