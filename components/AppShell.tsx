@@ -31,7 +31,11 @@ export default function AppShell() {
   // then swap in live data when the API answers.
   const [projects, setProjects] = useState<Project[]>(snapshotProjects)
   const [source, setSource] = useState<DataSource>('snapshot')
+  // Search text and the language filter live here rather than in the projects
+  // tab: the stack tab hands both of them over when you pick a topic or a
+  // language there, and the tab is unmounted while you do it.
   const [query, setQuery] = useState('')
+  const [language, setLanguage] = useState('all')
   const tabsRef = useRef<HTMLElement>(null)
   const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null)
   const shellRef = useRevealRoot<HTMLDivElement>()
@@ -123,6 +127,18 @@ export default function AppShell() {
   const showTopic = useCallback(
     (topic: string) => {
       setQuery(topic)
+      setLanguage('all')
+      navigate({ tab: 'projects', project: null })
+    },
+    [navigate],
+  )
+
+  // A language is a filter rather than a search term: "C" as free text matches
+  // every description with a c in it.
+  const showLanguage = useCallback(
+    (name: string) => {
+      setQuery('')
+      setLanguage(name)
       navigate({ tab: 'projects', project: null })
     },
     [navigate],
@@ -217,10 +233,19 @@ export default function AppShell() {
             projects={projects}
             query={query}
             onQueryChange={setQuery}
+            language={language}
+            onLanguageChange={setLanguage}
             onOpen={openDetail}
           />
         )}
-        {tab === 'stack' && <StackPane projects={projects} onTopicSelect={showTopic} />}
+        {tab === 'stack' && (
+          <StackPane
+            projects={projects}
+            onTopicSelect={showTopic}
+            onLanguageSelect={showLanguage}
+            onOpenProject={openDetail}
+          />
+        )}
         {tab === 'about' && (
           <AboutPane projects={projects} onStartRequest={() => startRequest()} />
         )}
@@ -267,7 +292,13 @@ export default function AppShell() {
       </footer>
 
       {selected && (
-        <ProjectPanel project={selected} onClose={closeDetail} onRequest={startRequest} />
+        <ProjectPanel
+          project={selected}
+          projects={projects}
+          onClose={closeDetail}
+          onOpen={openDetail}
+          onRequest={startRequest}
+        />
       )}
 
       {request && (

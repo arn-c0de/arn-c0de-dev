@@ -521,7 +521,11 @@ a:hover {
   flex-shrink: 0;
 }
 
-.iconbtn[aria-disabled='true'] {
+/* Two ways of being unavailable: the gallery arrows stay in the tab order and
+   only say so (see the note in OverviewPane), the panel's step buttons are
+   really disabled because there is nothing on the other side of them. */
+.iconbtn[aria-disabled='true'],
+.iconbtn:disabled {
   opacity: 0.4;
   cursor: default;
   transform: none;
@@ -1317,6 +1321,18 @@ a:hover {
   color: var(--text-muted);
 }
 
+/* Step to the project before or after this one without going back first. */
+.panel__step {
+  flex: 0 0 auto;
+  display: inline-flex;
+  gap: 4px;
+}
+
+.panel__step .iconbtn {
+  padding: 0 6px;
+  min-width: 28px;
+}
+
 .panel__body {
   flex: 1;
   overflow-y: auto;
@@ -1665,23 +1681,40 @@ a:hover {
 
 .bars {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 8px;
+  align-content: start;
 }
 
+/* A row is a button now — it filters the projects tab down to its language.
+   Dimming is driven by `data-dim` rather than a class: the reveal observer
+   writes `is-in` straight onto the node, and a className React re-renders
+   would take that class with it. */
 .bar__row {
+  display: block;
+  width: 100%;
   min-width: 0;
   padding: 8px 11px 9px;
   background: var(--bg-panel);
   border: 1px solid var(--border);
   border-radius: 10px;
   box-shadow: var(--shadow-sm);
-  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease),
+    opacity 0.2s var(--ease), transform 0.2s var(--ease);
 }
 
 .bar__row:hover {
   border-color: var(--border-strong);
   box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.bar__row[data-dim='true'] {
+  opacity: 0.45;
 }
 
 .bar__meta {
@@ -1840,6 +1873,234 @@ a:hover {
 
 .stack-pane .section {
   margin-bottom: 18px;
+}
+
+.section__hint {
+  margin: -3px 0 11px;
+  max-width: 74ch;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ── Charts ─────────────────────────────────────────────────────────────── */
+
+/* All drawn in components/Charts.tsx as plain SVG. Colour lives here rather
+   than in the markup, so the charts follow the theme like everything else;
+   only the per-language hues are set on the elements themselves. */
+
+.langs {
+  display: grid;
+  grid-template-columns: minmax(0, 210px) minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.langs__ring {
+  padding: 14px 12px;
+  display: grid;
+  place-items: center;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.ring {
+  display: block;
+  width: 100%;
+  max-width: 186px;
+  height: auto;
+  transform-origin: 50% 50%;
+}
+
+.ring__base {
+  fill: none;
+  stroke: var(--bg-inset);
+  stroke-width: 13;
+}
+
+.ring__seg {
+  fill: none;
+  stroke-width: 13;
+  cursor: pointer;
+  transition: stroke-width 0.2s var(--ease), opacity 0.2s var(--ease);
+}
+
+.ring__seg:hover {
+  stroke-width: 17;
+}
+
+.ring__seg[data-dim='true'] {
+  opacity: 0.25;
+}
+
+.ring__value {
+  fill: var(--text);
+  font-family: var(--font-mono);
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.ring__label {
+  fill: var(--text-faint);
+  font-size: 8.5px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+
+.chart {
+  margin: 0;
+  padding: 12px 12px 10px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Axis labels are sized in the viewBox's units, so a chart squeezed into a
+     phone would scale them down to nothing. Below this it scrolls instead. */
+  min-width: 600px;
+}
+
+.chart__grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.chart__tick {
+  fill: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 9px;
+}
+
+/* Bars are deliberately neutral: the accent belongs to the area, which is the
+   line worth reading, and two accent-coloured series would fight. */
+.chart__bar {
+  fill: color-mix(in srgb, var(--text-faint) 42%, transparent);
+}
+
+.chart__area {
+  fill: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.chart__line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  /* pathLength is 1 on the element, so one dash covers the whole line and the
+     draw-in animation is a single offset from 1 to 0. */
+  stroke-dasharray: 1;
+}
+
+.chart__dot {
+  fill: var(--accent);
+  stroke: var(--bg-panel);
+  stroke-width: 1.4;
+}
+
+.chart__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  padding: 8px 2px 0;
+  font-size: 11.5px;
+  color: var(--text-faint);
+}
+
+.chart__key {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chart__key::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.chart__key--area::before {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  border: 1.5px solid var(--accent);
+}
+
+.chart__key--bar::before {
+  background: color-mix(in srgb, var(--text-faint) 42%, transparent);
+}
+
+/* The timeline needs a minimum width to stay readable; below that it scrolls
+   inside its own card rather than shrinking the labels into nothing. */
+.chart--lanes {
+  padding: 10px 6px 8px;
+}
+
+.chart__scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.chart--lanes svg {
+  min-width: 680px;
+}
+
+.lane {
+  cursor: pointer;
+}
+
+.lane:focus {
+  outline: none;
+}
+
+.lane__hit {
+  fill: transparent;
+  transition: fill 0.15s var(--ease);
+}
+
+.lane:hover .lane__hit {
+  fill: var(--bg-hover);
+}
+
+.lane:focus-visible .lane__hit {
+  fill: var(--bg-hover);
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+.lane__name {
+  fill: var(--text-muted);
+  font-size: 10.5px;
+  font-weight: 650;
+}
+
+.lane:hover .lane__name {
+  fill: var(--text);
+}
+
+.lane__bar {
+  transition: filter 0.2s var(--ease);
+}
+
+.lane:hover .lane__bar {
+  filter: brightness(1.15);
+}
+
+.lane__end {
+  stroke: var(--bg-panel);
+  stroke-width: 1.6;
+}
+
+@media (max-width: 720px) {
+  .langs {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* ── Prose panes (about / contact) ──────────────────────────────────────── */
@@ -3134,6 +3395,77 @@ textarea.input--sm {
 
 .bar__row.is-in .bar__fill {
   transition-delay: calc(min(var(--i, 0), 7) * 60ms);
+}
+
+/* Charts draw themselves once their card scrolls in: the ring turns into
+   place, the bars grow off the baseline and the line runs left to right.
+   `transform-box: fill-box` is what makes a transform-origin inside an SVG
+   shape mean the shape rather than the whole canvas. */
+
+.langs__ring.is-in .ring {
+  animation: ring-in 0.7s var(--ease) both;
+}
+
+@keyframes ring-in {
+  from {
+    opacity: 0;
+    transform: rotate(-26deg) scale(0.88);
+  }
+}
+
+.chart.is-in .chart__bar {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: bar-grow 0.5s var(--ease-snap) both;
+  animation-delay: calc(min(var(--i, 0), 12) * 35ms);
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+.chart.is-in .chart__line {
+  animation: draw-line 0.9s var(--ease) both;
+}
+
+@keyframes draw-line {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+.chart.is-in .chart__area,
+.chart.is-in .chart__dot {
+  animation: fade-in 0.7s var(--ease) both;
+  animation-delay: 0.25s;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.chart--lanes.is-in .lane__bar {
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+  animation: lane-grow 0.55s var(--ease-snap) both;
+  animation-delay: calc(min(var(--i, 0), 14) * 30ms);
+}
+
+@keyframes lane-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.chart--lanes.is-in .lane__end {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: pop-in 0.4s var(--ease-snap) both;
+  animation-delay: calc(min(var(--i, 0), 14) * 30ms + 220ms);
 }
 
 /* Panes slide in from the side the tab sits on, so moving right through the

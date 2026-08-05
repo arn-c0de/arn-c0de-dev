@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 export const TABS = ['overview', 'projects', 'stack', 'about', 'contact'] as const
 
@@ -57,6 +57,13 @@ export function useAppState(): [AppState, (next: Partial<AppState>) => void] {
     requestFor: [],
   })
 
+  // The latest state, readable outside a render. `navigate` merges against
+  // this rather than from inside a setState updater: Next patches
+  // `history.pushState` to drive its own router, and calling it from an
+  // updater — which React runs while rendering — updates the router mid-render.
+  const latest = useRef(state)
+  latest.current = state
+
   // Read the URL after mount; the server-rendered HTML has no query string.
   useEffect(() => {
     setState(parse(location.search))
@@ -66,11 +73,11 @@ export function useAppState(): [AppState, (next: Partial<AppState>) => void] {
   }, [])
 
   const navigate = useCallback((next: Partial<AppState>) => {
-    setState((current) => {
-      const merged = { ...current, ...next }
-      history.pushState(null, '', serialise(merged))
-      return merged
-    })
+    const merged = { ...latest.current, ...next }
+    // Written straight away so two calls in one event build on each other.
+    latest.current = merged
+    history.pushState(null, '', serialise(merged))
+    setState(merged)
   }, [])
 
   return [state, navigate]

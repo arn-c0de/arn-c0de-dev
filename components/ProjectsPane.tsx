@@ -18,15 +18,19 @@ export default function ProjectsPane({
   projects,
   query,
   onQueryChange,
+  language,
+  onLanguageChange,
   onOpen,
 }: {
   projects: Project[]
   query: string
   onQueryChange: (q: string) => void
+  /** Held by the shell, so the stack tab can arrive with one already picked. */
+  language: string
+  onLanguageChange: (language: string) => void
   onOpen: (name: string) => void
 }) {
   const [category, setCategory] = useState<string>('all')
-  const [language, setLanguage] = useState<string>('all')
   const [sort, setSort] = useState<SortKey>('featured')
   const [showAll, setShowAll] = useState(config.showAllByDefault)
 
@@ -58,7 +62,7 @@ export default function ProjectsPane({
   function reset() {
     onQueryChange('')
     setCategory('all')
-    setLanguage('all')
+    onLanguageChange('all')
   }
 
   return (
@@ -93,7 +97,7 @@ export default function ProjectsPane({
         <select
           className="select"
           value={language}
-          onChange={(e) => setLanguage(e.target.value)}
+          onChange={(e) => onLanguageChange(e.target.value)}
           aria-label="Filter by language"
         >
           <option value="all">All languages</option>

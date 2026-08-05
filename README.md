@@ -44,6 +44,31 @@ Categories are inferred from topics and language via the `categories` array — 
 `fallbackCategory` catches the rest. The Stack tab needs no maintenance at all: it counts
 languages, domains and topics from whatever the API returns.
 
+## The stack tab
+
+Four readings of the same repository list, none of them hand-written:
+
+- a **ring** of the language split, with the bar list beside it — hovering either side highlights
+  the other, and picking a language opens the projects tab filtered to it,
+- an **activity chart**: how many projects sat between their first commit and their last push in
+  each month (area), and how many started in it (bars),
+- a **project timeline**: one lane per repository from creation to last push, coloured by
+  language; a lane opens that project,
+- the domain grid and the topic cloud, where a topic searches the projects tab for it.
+
+The aggregation lives in `lib/stats.ts` and the drawing in `components/Charts.tsx` — plain inline
+SVG, no charting library, no canvas. Two things to know before editing them:
+
+- Colour comes from CSS custom properties in `globals.css`, not from the markup, so the charts
+  follow the theme. Only the per-language hues are computed, by the same `languageHue()` the
+  language dots use.
+- Dynamic state travels on `data-*` attributes rather than in `className`. The scroll-reveal
+  observer writes `is-in` straight onto the DOM node; a `className` React re-rendered on hover
+  would take that class with it and the element would drop back to `opacity: 0`.
+
+Nothing in `lib/stats.ts` reads the clock or the locale — months are bucketed in UTC with a fixed
+label table — so the prerendered HTML and the first client render agree exactly.
+
 ### Refreshing the offline snapshot
 
 `data/repos.json` is the fallback shown when the API is unavailable. Regenerate it whenever the
@@ -105,6 +130,16 @@ gh workflow run deploy.yml --ref main
 ```
 
 The repository must be public for Pages to publish on a free account.
+
+## The project panel
+
+Opening a project slides a panel over whatever you were looking at, so the grid, the gallery and
+the timeline all keep their place. Inside it: `[` and `]` — or the two chevrons in its header —
+step to the previous and next repository without going back to the list first, and *Copy link*
+hands over the current URL, which already carries `?p=<Name>`.
+
+Stepping follows the order the site holds the repositories in (the API's `sort=updated`), not the
+order of whichever filtered view you came from; the buttons disable at the ends.
 
 ## The request modal
 

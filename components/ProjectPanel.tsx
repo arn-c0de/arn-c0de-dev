@@ -4,7 +4,15 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { loadReadme } from '@/lib/github'
 import { formatMonth, formatRelative, languageHue } from '@/lib/format'
 import type { Project } from '@/lib/types'
-import { CloseIcon, GitHubIcon, LinkIcon, RequestIcon } from './Icons'
+import {
+  CheckIcon,
+  ChevronIcon,
+  CloseIcon,
+  CopyIcon,
+  GitHubIcon,
+  LinkIcon,
+  RequestIcon,
+} from './Icons'
 
 /**
  * GitHub already sanitises the HTML it renders, but this runs it through the
@@ -65,16 +73,57 @@ function sanitise(html: string, repo: string): { withImages: string; withoutImag
   return { withImages, withoutImages: doc.body.innerHTML, images: images.length }
 }
 
+/**
+ * The address bar already carries the open project (`?p=Name`), so sharing a
+ * project is just handing over the current URL.
+ */
+function CopyLinkButton({ project }: { project: string }) {
+  const [copied, setCopied] = useState(false)
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(location.href)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1600)
+    } catch {
+      /* Clipboard blocked — the URL is in the address bar either way. */
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      className={`btn${copied ? ' btn--copied' : ''}`}
+      onClick={copy}
+      title={`Copy a link that opens ${project}`}
+    >
+      {/* Keyed so the tick mounts fresh and pops rather than swapping in flat. */}
+      <span className="btn__icon" key={copied ? 'done' : 'idle'}>
+        {copied ? <CheckIcon /> : <CopyIcon />}
+      </span>
+      {copied ? 'Copied' : 'Copy link'}
+    </button>
+  )
+}
+
 export default function ProjectPanel({
   project,
+  projects,
   onClose,
+  onOpen,
   onRequest,
 }: {
   project: Project
+  /** The full list, in the order the site holds it — the panel steps along it. */
+  projects: Project[]
   onClose: () => void
+  onOpen: (name: string) => void
   /** Opens the request tab with this project already attached. */
   onRequest: (name: string) => void
 }) {
+  const position = projects.findIndex((p) => p.name === project.name)
+  const previous = position > 0 ? projects[position - 1] : null
+  const next = position !== -1 && position < projects.length - 1 ? projects[position + 1] : null
   const [readme, setReadme] = useState<{ withImages: string; withoutImages: string; images: number } | null>(null)
   const [readmeState, setReadmeState] = useState<'loading' | 'ready' | 'missing'>('loading')
   const [imagesShown, setImagesShown] = useState(false)
@@ -141,23 +190,45 @@ export default function ProjectPanel({
     return () => controller.abort()
   }, [project.name])
 
-  // Escape closes; focus moves into the panel so keyboard users land here.
+  // Focus moves into the panel so keyboard users land here — and again when
+  // stepping to the next project, which replaces everything below the header.
   useEffect(() => {
     closeRef.current?.focus()
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.stopPropagation()
-        onClose()
-      }
-    }
-    document.addEventListener('keydown', onKey)
+  }, [project.name])
+
+  // The page behind the panel holds still for as long as it is open.
+  useEffect(() => {
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => {
-      document.removeEventListener('keydown', onKey)
       document.body.style.overflow = previousOverflow
     }
-  }, [onClose])
+  }, [])
+
+  // Escape closes; [ and ] step through the list — the arrow keys are left
+  // alone because the readme scrolls under them, and so does the resize grip.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      // A bracket typed into the topbar search is a search term, not a step.
+      const typing =
+        e.target instanceof HTMLElement &&
+        ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)
+      if (e.key === 'Escape') {
+        e.stopPropagation()
+        onClose()
+      } else if (typing) {
+        return
+      } else if (e.key === '[' && previous) {
+        e.preventDefault()
+        onOpen(previous.name)
+      } else if (e.key === ']' && next) {
+        e.preventDefault()
+        onOpen(next.name)
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose, onOpen, previous, next])
 
   const links = [
     { label: 'Repository', href: project.html_url, icon: <GitHubIcon size={14} /> },
@@ -202,6 +273,32 @@ export default function ProjectPanel({
               {project.category}
             </p>
           </div>
+          {/* Stepping through the list without going back to the grid every
+              time. Disabled at the ends rather than hidden, so the pair does
+              not shift the close button around as you move along. */}
+          <div className="panel__step">
+            <button
+              type="button"
+              className="iconbtn"
+              onClick={() => previous && onOpen(previous.name)}
+              disabled={!previous}
+              aria-label={previous ? `Previous project: ${previous.title}` : 'No previous project'}
+              title={previous ? `${previous.title}  [` : undefined}
+            >
+              <ChevronIcon dir="left" />
+            </button>
+            <button
+              type="button"
+              className="iconbtn"
+              onClick={() => next && onOpen(next.name)}
+              disabled={!next}
+              aria-label={next ? `Next project: ${next.title}` : 'No next project'}
+              title={next ? `${next.title}  ]` : undefined}
+            >
+              <ChevronIcon dir="right" />
+            </button>
+          </div>
+
           <button ref={closeRef} type="button" className="iconbtn" onClick={onClose} aria-label="Close panel">
             <CloseIcon />
           </button>
@@ -232,6 +329,7 @@ export default function ProjectPanel({
                   {link.label}
                 </a>
               ))}
+              <CopyLinkButton project={project.title} />
             </div>
           </section>
 
