@@ -1,10 +1,11 @@
 'use client'
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { asset } from '@/lib/basePath'
 import { loadProjects, snapshotProjects } from '@/lib/github'
 import type { DataSource, Project } from '@/lib/types'
-import { useRevealRoot } from '@/lib/useMotion'
+import { usePrefersReducedMotion, useRevealRoot } from '@/lib/useMotion'
 import { TABS, useAppState, type Tab } from '@/lib/useAppState'
 import AboutPane from './AboutPane'
 import ContactPane from './ContactPane'
@@ -15,7 +16,15 @@ import RequestModal from './RequestModal'
 import StackPane from './StackPane'
 import ThemeToggle from './ThemeToggle'
 import TopSearch from './TopSearch'
-import { GitHubIcon, RequestIcon } from './Icons'
+import {
+  AboutIcon,
+  GitHubIcon,
+  MailIcon,
+  OverviewIcon,
+  ProjectsIcon,
+  RequestIcon,
+  StackIcon,
+} from './Icons'
 
 const TAB_LABELS: Record<Tab, string> = {
   overview: 'Overview',
@@ -23,6 +32,26 @@ const TAB_LABELS: Record<Tab, string> = {
   stack: 'Stack',
   about: 'About',
   contact: 'Contact',
+}
+
+/** Each tab carries its mark, so a narrow screen can drop the words. */
+const TAB_ICONS: Record<Tab, () => React.ReactNode> = {
+  overview: OverviewIcon,
+  projects: ProjectsIcon,
+  stack: StackIcon,
+  about: AboutIcon,
+  contact: MailIcon,
+}
+
+/** A tap on a touch device gets the shortest tick the API will honour. */
+function tick() {
+  if (typeof navigator === 'undefined' || !navigator.vibrate) return
+  if (!matchMedia('(pointer: coarse)').matches) return
+  try {
+    navigator.vibrate(7)
+  } catch {
+    /* Some browsers expose vibrate() and then refuse it; nothing to do. */
+  }
 }
 
 export default function AppShell() {
@@ -40,6 +69,7 @@ export default function AppShell() {
   const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null)
   const shellRef = useRevealRoot<HTMLDivElement>()
   const [scrolled, setScrolled] = useState(false)
+  const reduced = usePrefersReducedMotion()
 
   // Which way the new pane comes in from: tab order decides, so moving right
   // through the tabs always feels like moving right.
@@ -75,21 +105,27 @@ export default function AppShell() {
     }
   }, [])
 
-  // The active-tab underline is one shared element that glides between tabs,
-  // so its position has to be measured from the DOM.
+  // The active tab sits on one shared pill that slides between them, so its
+  // position has to be measured from the DOM.
   useLayoutEffect(() => {
     const nav = tabsRef.current
     if (!nav) return
     const measure = () => {
       const active = nav.querySelector<HTMLElement>('[aria-selected="true"]')
       if (!active) return
-      setIndicator({ left: active.offsetLeft + 10, width: active.offsetWidth - 20 })
+      setIndicator({ left: active.offsetLeft, width: active.offsetWidth })
     }
     measure()
-    // Font loading and viewport changes both shift tab widths.
+    // Font loading and viewport changes both shift tab widths — and on a
+    // narrow screen the labels themselves expand, which the pill has to
+    // follow once that transition has finished.
     document.fonts?.ready.then(measure)
+    const settle = setTimeout(measure, 420)
     window.addEventListener('resize', measure)
-    return () => window.removeEventListener('resize', measure)
+    return () => {
+      clearTimeout(settle)
+      window.removeEventListener('resize', measure)
+    }
   }, [tab, projects.length])
 
   useEffect(() => {
@@ -124,13 +160,71 @@ export default function AppShell() {
     [navigate, requestFor],
   )
 
+  /**
+   * Changing tab replaces the whole page body, so it gets a real transition
+   * rather than an entrance: the outgoing pane falls back and blurs out while
+   * the next one comes forward, and the pill glides under the tab you pressed.
+   *
+   * That is what a view transition is for — the browser snapshots the page as
+   * it is painted, so the old pane needs no second render and none of its
+   * scroll-revealed pieces have to be re-shown. Without the API (or with
+   * reduced motion asked for) the state just changes and the CSS entrance in
+   * globals.css carries it.
+   */
+  const selectTab = useCallback(
+    (next: Tab) => {
+      tick()
+      if (next === tab) {
+        // Same tab pressed again: treat it as "take me back to the top".
+        window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' })
+        navigate({ project: null })
+        return
+      }
+
+      const forward = TABS.indexOf(next) > TABS.indexOf(tab)
+      // flushSync so React has committed the new pane before the browser
+      // captures the after state.
+      const apply = () => {
+        flushSync(() => navigate({ tab: next, project: null }))
+        // The pane and its heading carry their own entrance for browsers
+        // without this API. Here the transition *is* the entrance, so they are
+        // sent to their finished state before the snapshot is taken —
+        // otherwise the snapshot catches them at frame zero, invisible.
+        document
+          .querySelector('.pane')
+          ?.getAnimations({ subtree: true })
+          .forEach((animation) => {
+            if (animation.effect?.getTiming().iterations !== Infinity) animation.finish()
+          })
+      }
+
+      if (reduced || !document.startViewTransition) {
+        apply()
+        return
+      }
+
+      const root = document.documentElement
+      root.dataset.vt = 'tab'
+      root.dataset.vtDir = forward ? 'forward' : 'back'
+      const transition = document.startViewTransition(apply)
+      const clear = () => {
+        delete root.dataset.vt
+        delete root.dataset.vtDir
+      }
+      // Both branches clear: an interrupted transition still applied the
+      // state, and leaving the attributes on would name the next snapshot.
+      transition.finished.then(clear, clear)
+    },
+    [navigate, reduced, tab],
+  )
+
   const showTopic = useCallback(
     (topic: string) => {
       setQuery(topic)
       setLanguage('all')
-      navigate({ tab: 'projects', project: null })
+      selectTab('projects')
     },
-    [navigate],
+    [selectTab],
   )
 
   // A language is a filter rather than a search term: "C" as free text matches
@@ -139,16 +233,16 @@ export default function AppShell() {
     (name: string) => {
       setQuery('')
       setLanguage(name)
-      navigate({ tab: 'projects', project: null })
+      selectTab('projects')
     },
-    [navigate],
+    [selectTab],
   )
 
   return (
     <div className="shell" ref={shellRef}>
       <header className="topbar" data-scrolled={scrolled}>
         <div className="topbar__row">
-          <button type="button" className="brand" onClick={() => navigate({ tab: 'overview', project: null })}>
+          <button type="button" className="brand" onClick={() => selectTab('overview')}>
             {/* Served from this domain, not from GitHub's avatar CDN. */}
             <img className="brand__mark" src={asset('/avatar.jpg')} alt="" width={26} height={26} />
             arn-c0de
@@ -158,7 +252,7 @@ export default function AppShell() {
 
           <TopSearch
             projects={projects}
-            onNavigate={(t) => navigate({ tab: t, project: null })}
+            onNavigate={selectTab}
             onOpenProject={openDetail}
             onStartRequest={() => startRequest()}
           />
@@ -187,32 +281,41 @@ export default function AppShell() {
         </div>
 
         <nav className="tabs" role="tablist" aria-label="Sections" ref={tabsRef}>
+          {/* The pill is a sibling of the tabs rather than a border on the
+              active one: one element that travels, instead of five that
+              light up. Position comes from the layout effect above. */}
           {indicator && (
             <span
-              className="tabs__indicator"
+              className="tabs__pill"
               aria-hidden
-              style={{ width: indicator.width, transform: `translateX(${indicator.left}px)` }}
+              style={{ left: indicator.left, width: indicator.width }}
             />
           )}
-          {TABS.map((t) => (
-            <button
-              key={t}
-              type="button"
-              className="tab"
-              role="tab"
-              aria-selected={tab === t}
-              onClick={() => navigate({ tab: t, project: null })}
-            >
-              {TAB_LABELS[t]}
-              {/* Keyed on the number so the badge remounts — and replays its
-                  pop — when the live list lands on a different count. */}
-              {t === 'projects' && (
-                <span className="tab__count" key={projects.length}>
-                  {projects.length}
+          {TABS.map((t) => {
+            const Icon = TAB_ICONS[t]
+            return (
+              <button
+                key={t}
+                type="button"
+                className="tab"
+                role="tab"
+                aria-selected={tab === t}
+                onClick={() => selectTab(t)}
+              >
+                <span className="tab__icon">
+                  <Icon />
                 </span>
-              )}
-            </button>
-          ))}
+                <span className="tab__label">{TAB_LABELS[t]}</span>
+                {/* Keyed on the number so the badge remounts — and replays its
+                    pop — when the live list lands on a different count. */}
+                {t === 'projects' && (
+                  <span className="tab__count" key={projects.length}>
+                    {projects.length}
+                  </span>
+                )}
+              </button>
+            )
+          })}
         </nav>
 
         {/* Reading progress; width comes from --scroll-progress. */}
@@ -223,7 +326,7 @@ export default function AppShell() {
         {tab === 'overview' && (
           <OverviewPane
             projects={projects}
-            onNavigate={(t) => navigate({ tab: t, project: null })}
+            onNavigate={selectTab}
             onOpenProject={openDetail}
             onStartRequest={() => startRequest()}
           />

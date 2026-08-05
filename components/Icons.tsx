@@ -141,6 +141,47 @@ export function SendIcon() {
   )
 }
 
+/* Tab marks. One weight, one grid, so the row reads as a set rather than as
+   five borrowed glyphs. */
+
+export function OverviewIcon() {
+  return (
+    <svg {...base} width={15} height={15}>
+      <rect x="2" y="2" width="5.2" height="5.2" rx="1.4" />
+      <rect x="8.8" y="2" width="5.2" height="5.2" rx="1.4" />
+      <rect x="2" y="8.8" width="5.2" height="5.2" rx="1.4" />
+      <rect x="8.8" y="8.8" width="5.2" height="5.2" rx="1.4" />
+    </svg>
+  )
+}
+
+export function ProjectsIcon() {
+  return (
+    <svg {...base} width={15} height={15}>
+      <path d="M8 1.9 14 5v6l-6 3.1L2 11V5z" />
+      <path d="M2 5l6 3.1L14 5M8 8.1v6" />
+    </svg>
+  )
+}
+
+export function StackIcon() {
+  return (
+    <svg {...base} width={15} height={15}>
+      <path d="M8 1.9 14.2 5 8 8.1 1.8 5z" />
+      <path d="M1.8 8 8 11.1 14.2 8M1.8 11 8 14.1 14.2 11" />
+    </svg>
+  )
+}
+
+export function AboutIcon() {
+  return (
+    <svg {...base} width={15} height={15}>
+      <circle cx="8" cy="5.6" r="2.9" />
+      <path d="M2.6 14c.6-2.8 2.7-4.3 5.4-4.3s4.8 1.5 5.4 4.3" />
+    </svg>
+  )
+}
+
 /**
  * Small, locally drawn language marks for the Stack pane. They deliberately
  * share one badge shape so the mixed toolchain reads as a coherent set rather

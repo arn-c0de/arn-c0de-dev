@@ -11,6 +11,9 @@
 
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-snap: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Overshoots and settles back — what makes a control feel pressed rather
+     than merely updated. Anything that should read as physical uses this. */
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* Light theme is the default; the dark block below overrides it. */
   --bg: #f5f6fa;
@@ -283,7 +286,7 @@ a:hover {
   border-radius: var(--radius-sm);
   color: var(--text-muted);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.15s var(--ease);
+  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.22s var(--spring);
 }
 
 .iconbtn:hover {
@@ -309,13 +312,15 @@ a:hover {
   white-space: nowrap;
 }
 
-/* Tabs */
+/* Tabs — a segmented control rather than a row of underlined words: one pill
+   travels to whatever you press, and each section carries its own mark so a
+   phone can drop the labels without the row turning into initials. */
 
 .tabs {
   position: relative;
   max-width: var(--shell-max);
   margin: 0 auto;
-  padding: 0 12px;
+  padding: 5px 12px 7px;
   display: flex;
   gap: 2px;
   overflow-x: auto;
@@ -328,46 +333,103 @@ a:hover {
 
 .tab {
   position: relative;
+  z-index: 1;
   appearance: none;
   background: none;
   border: 0;
-  padding: 9px 12px 11px;
-  font-size: 14px;
+  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: 999px;
+  font-size: 13.5px;
   font-weight: 600;
   color: var(--text-muted);
   cursor: pointer;
   white-space: nowrap;
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-  transition: color 0.15s, background 0.15s;
+  transition: color 0.18s var(--ease), transform 0.22s var(--spring);
 }
 
 .tab:hover {
   color: var(--text);
-  background: var(--bg-hover);
+}
+
+/* The press is the point: it gives way under the finger and springs back. */
+.tab:active {
+  transform: scale(0.93);
 }
 
 .tab[aria-selected='true'] {
   color: var(--text);
 }
 
-/* Shared underline that glides to the active tab; positioned from JS. */
-.tabs__indicator {
+.tab__icon {
+  display: inline-flex;
+  line-height: 0;
+  color: var(--text-faint);
+  transition: color 0.2s var(--ease), transform 0.35s var(--spring);
+}
+
+.tab:hover .tab__icon {
+  color: var(--text-muted);
+}
+
+.tab[aria-selected='true'] .tab__icon {
+  color: var(--accent);
+  transform: scale(1.08);
+}
+
+/* The pill the active tab sits on; position and width come from JS. Tinted
+   glass rather than a solid chip — during a tab change it travels as its own
+   layer over the bar, and a label has to stay readable underneath it. */
+.tabs__pill {
   position: absolute;
-  bottom: 0;
+  top: 5px;
+  bottom: 7px;
   left: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  border-radius: 2px 2px 0 0;
+  z-index: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
   pointer-events: none;
-  transition: transform 0.3s var(--ease), width 0.3s var(--ease);
+  transition: left 0.42s var(--spring), width 0.42s var(--spring);
 }
 
 .tab__count {
-  margin-left: 6px;
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
   color: var(--text-faint);
+}
+
+/* Narrow: only the tab you are on says what it is, the rest are marks. The
+   label slides open rather than appearing, so the pill has something to
+   follow. */
+@media (max-width: 640px) {
+  .tab__label {
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-width 0.38s var(--ease), opacity 0.28s var(--ease);
+  }
+
+  .tab[aria-selected='true'] .tab__label {
+    max-width: 8em;
+    opacity: 1;
+  }
+
+  .tab {
+    gap: 0;
+    padding: 6px 10px;
+  }
+
+  .tab[aria-selected='true'] {
+    gap: 7px;
+  }
+
+  .tab:not([aria-selected='true']) .tab__count {
+    display: none;
+  }
 }
 
 /* Content */
@@ -393,6 +455,27 @@ a:hover {
 
 .pane__head {
   margin: 0 0 14px;
+}
+
+/* The heading arrives a beat after the pane it belongs to, its line behind
+   it — small enough not to hold anything up, enough to read as arriving. */
+.pane__head > * {
+  animation: rise-sm 0.42s var(--ease) both;
+}
+
+.pane__title {
+  animation-delay: 0.05s;
+}
+
+.pane__lede {
+  animation-delay: 0.12s;
+}
+
+@keyframes rise-sm {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
 }
 
 .pane__title {
@@ -805,7 +888,7 @@ a:hover {
   font-weight: 550;
   color: var(--text-muted);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.15s var(--ease), box-shadow 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.22s var(--spring), box-shadow 0.15s;
 }
 
 .chip:hover {
@@ -815,7 +898,7 @@ a:hover {
 }
 
 .chip:active {
-  transform: translateY(0) scale(0.97);
+  transform: translateY(0) scale(0.95);
 }
 
 .chip[aria-pressed='true'] {
@@ -855,7 +938,7 @@ a:hover {
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   overflow: hidden;
-  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
+  transition: transform 0.24s var(--spring), box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
   /* Cards fade in with a slight stagger; --i is set per card from JS. */
   animation: card-in 0.4s var(--ease) both;
   animation-delay: min(calc(var(--i, 0) * 30ms), 300ms);
@@ -875,7 +958,7 @@ a:hover {
 }
 
 .card:active {
-  transform: translateY(-1px);
+  transform: translateY(-1px) scale(0.985);
 }
 
 /* A hairline along the top edge instead of the old notched badge — it marks
@@ -1119,7 +1202,7 @@ a:hover {
   font-weight: 600;
   color: var(--text);
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, transform 0.15s var(--ease), box-shadow 0.15s;
+  transition: background 0.15s, border-color 0.15s, transform 0.22s var(--spring), box-shadow 0.15s;
 }
 
 .btn:hover {
@@ -1130,7 +1213,7 @@ a:hover {
 }
 
 .btn:active {
-  transform: translateY(0) scale(0.98);
+  transform: translateY(0) scale(0.965);
 }
 
 .btn--primary {
@@ -1704,7 +1787,7 @@ a:hover {
   text-align: left;
   cursor: pointer;
   transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease),
-    opacity 0.2s var(--ease), transform 0.2s var(--ease);
+    opacity 0.2s var(--ease), transform 0.24s var(--spring);
 }
 
 .bar__row:hover {
@@ -1794,7 +1877,8 @@ a:hover {
   border: 1px solid var(--border);
   border-radius: 10px;
   box-shadow: var(--shadow-sm);
-  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease),
+    transform 0.24s var(--spring);
 }
 
 .domain-card:hover {
@@ -1842,7 +1926,7 @@ a:hover {
   font-size: 12px;
   color: var(--text-muted);
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s, background 0.15s, transform 0.15s var(--ease);
+  transition: border-color 0.15s, color 0.15s, background 0.15s, transform 0.24s var(--spring);
 }
 
 .cloud__tag:hover {
@@ -1850,6 +1934,14 @@ a:hover {
   background: var(--accent-soft);
   color: var(--text);
   transform: translateY(-1px);
+}
+
+/* Everything that can be pressed gives way and springs back, so the whole
+   page answers a click the way the tabs do. */
+.cloud__tag:active,
+.bar__row:active,
+.domain-card:active {
+  transform: translateY(0) scale(0.96);
 }
 
 .cloud__tag b {
@@ -3468,33 +3560,117 @@ textarea.input--sm {
   animation-delay: calc(min(var(--i, 0), 14) * 30ms + 220ms);
 }
 
-/* Panes slide in from the side the tab sits on, so moving right through the
-   tabs looks like moving right. `clip` rather than `hidden`: it swallows the
-   sideways overshoot on a narrow screen without turning the main column into
-   a scroll container. */
+/* Changing tab is a move in depth: the pane arrives from slightly in front of
+   the page, blurred and low, and settles. The direction of travel is only a
+   nudge sideways — enough to say which way you went without the whole column
+   sliding past. `clip` rather than `hidden`: it swallows that nudge on a
+   narrow screen without turning the main column into a scroll container. */
 .main {
   overflow-x: clip;
 }
 
 .main[data-dir='forward'] .pane {
-  animation-name: pane-forward;
+  animation-name: pane-arrive;
+  --pane-x: 22px;
 }
 
 .main[data-dir='back'] .pane {
-  animation-name: pane-back;
+  animation-name: pane-arrive;
+  --pane-x: -22px;
 }
 
-@keyframes pane-forward {
+@keyframes pane-arrive {
   from {
     opacity: 0;
-    transform: translate3d(26px, 6px, 0);
+    transform: translate3d(var(--pane-x, 0), 18px, 0) scale(1.03);
+    filter: blur(8px);
   }
 }
 
-@keyframes pane-back {
+/* Where the browser has view transitions, the same move gets its other half:
+   the outgoing pane is a real snapshot of the page as it was painted, so it
+   can fall back and blur out under the incoming one without rendering the
+   old tab a second time. Both pieces are named only while a tab change is
+   running — the theme wipe below wants the page as one image. */
+
+/* The entrance above is not switched off here even though the transition
+   replaces it: a CSS animation that goes from `none` back to something starts
+   over, so the pane would play it again the moment the transition ends. It is
+   finished off in JS instead, in the same commit that swaps the pane. */
+:root[data-vt='tab'] .pane {
+  view-transition-name: pane;
+}
+
+/* Named as well, so it travels as its own layer: the rest of the bar is a
+   still image during the transition, and a CSS transition inside a still
+   image is not a transition at all. */
+:root[data-vt='tab'] .tabs__pill {
+  view-transition-name: tabpill;
+}
+
+:root[data-vt='tab']::view-transition-group(tabpill) {
+  animation-duration: 0.44s;
+  animation-timing-function: var(--spring);
+}
+
+:root[data-vt='tab'] {
+  --vt-x: 26px;
+}
+
+:root[data-vt='tab'][data-vt-dir='back'] {
+  --vt-x: -26px;
+}
+
+/* Everything outside the pane — bar, tabs, footer — changes almost nothing
+   between two tabs, so it simply swaps: the new page is shown at once and the
+   old snapshot is dropped. Cross-fading it instead would mean animating a
+   snapshot of the whole scrollable page, and a short tab following a long one
+   squashes the header while that group resizes. */
+:root[data-vt='tab']::view-transition-group(root) {
+  animation-duration: 1ms;
+}
+
+:root[data-vt='tab']::view-transition-old(root) {
+  animation: none;
+  opacity: 0;
+}
+
+:root[data-vt='tab']::view-transition-new(root) {
+  animation: none;
+  opacity: 1;
+}
+
+/* Snapshots are stretched to their group by default; at natural size and
+   anchored to the top they are simply clipped as the group resizes, which is
+   what you want when two panes are different heights. */
+:root[data-vt='tab']::view-transition-old(pane),
+:root[data-vt='tab']::view-transition-new(pane) {
+  object-fit: none;
+  object-position: top center;
+  mix-blend-mode: normal;
+}
+
+:root[data-vt='tab']::view-transition-old(pane) {
+  animation: vt-pane-out 0.3s var(--ease) both;
+}
+
+:root[data-vt='tab']::view-transition-new(pane) {
+  animation: vt-pane-in 0.44s var(--ease-snap) both;
+}
+
+@keyframes vt-pane-out {
+  to {
+    opacity: 0;
+    transform: translate3d(calc(var(--vt-x) * -0.5), -14px, 0) scale(0.96);
+    filter: blur(7px);
+  }
+}
+
+@keyframes vt-pane-in {
   from {
     opacity: 0;
-    transform: translate3d(-26px, 6px, 0);
+    transform: translate3d(var(--vt-x), 26px, 0) scale(1.04);
+    filter: blur(9px);
   }
 }
 
@@ -3621,18 +3797,19 @@ textarea.input--sm {
 }
 
 /* The default cross-fade would blur the wipe; the clip-path animation the
-   toggle starts is the whole effect. */
-::view-transition-old(root),
-::view-transition-new(root) {
+   toggle starts is the whole effect. Scoped to the theme change — a tab
+   change wants the ordinary cross-fade for everything outside the pane. */
+:root[data-vt='theme']::view-transition-old(root),
+:root[data-vt='theme']::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
 }
 
-::view-transition-old(root) {
+:root[data-vt='theme']::view-transition-old(root) {
   z-index: 0;
 }
 
-::view-transition-new(root) {
+:root[data-vt='theme']::view-transition-new(root) {
   z-index: 1;
 }
 

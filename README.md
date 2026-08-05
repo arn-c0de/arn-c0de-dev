@@ -44,6 +44,35 @@ Categories are inferred from topics and language via the `categories` array — 
 `fallbackCategory` catches the rest. The Stack tab needs no maintenance at all: it counts
 languages, domains and topics from whatever the API returns.
 
+## Moving between tabs
+
+The tab bar is a segmented control: every section carries its own mark, and one
+tinted pill travels to whatever you press — measured from the DOM in `AppShell.tsx`, because tab
+widths depend on the font. Under 640px only the tab you are on keeps its label; the others are
+marks, which is also what keeps the row from overflowing on a phone. A tap on a touch device gets
+a 7ms buzz through `navigator.vibrate`, and pressing the tab you are already on scrolls back to
+the top.
+
+The switch itself is a **view transition**: the outgoing pane falls back and blurs out while the
+next one comes forward. The browser snapshots the page as it is painted, so the old tab is never
+rendered a second time and none of its scroll-revealed pieces have to be re-shown. Three details
+that are easy to break:
+
+- Only `.pane` and the pill are named (`view-transition-name`), and only while `data-vt="tab"` is
+  on the root. Everything else swaps instantly — cross-fading it would mean animating a snapshot
+  of the whole scrollable page, which squashes the header when a short tab follows a long one.
+- The pill is named as well, because during a transition the rest of the bar is a still image,
+  and a CSS transition inside a still image does not move. It is translucent so the label
+  underneath stays readable as it passes over.
+- The pane keeps its CSS entrance for browsers without the API, and `apply()` in `AppShell.tsx`
+  calls `.finish()` on it instead of the CSS switching it off — an animation that goes from `none`
+  back to something starts over, and the pane would replay its entrance the moment the transition
+  ends.
+
+`prefers-reduced-motion` or no `startViewTransition` and the state simply changes; the CSS
+entrance in `globals.css` carries it. The theme wipe uses the same API and marks itself with
+`data-vt="theme"`, which is what its `::view-transition-old(root)` rules are scoped to.
+
 ## The stack tab
 
 Four readings of the same repository list, none of them hand-written:

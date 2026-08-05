@@ -51,7 +51,12 @@ export default function ThemeToggle() {
     const y = box.top + box.height / 2
     const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))
 
+    // Marks which transition is running: the rules for the wipe are scoped to
+    // it, so a tab change can style the same pseudo-elements differently.
+    document.documentElement.dataset.vt = 'theme'
     const transition = document.startViewTransition(apply)
+    const clear = () => delete document.documentElement.dataset.vt
+    transition.finished.then(clear, clear)
     transition.ready
       .then(() => {
         document.documentElement.animate(
