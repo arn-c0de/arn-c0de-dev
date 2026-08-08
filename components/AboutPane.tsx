@@ -85,8 +85,8 @@ export default function AboutPane({
             <span className="role__tag">Training</span>
             <h3 className="role__title">Electronics technician for devices and systems</h3>
             <p className="role__text">
-              Apprenticeship, hardware side: building, measuring and commissioning electronic
-              devices, and finding the fault when one of them does not behave.
+              The hardware side: building and measuring devices, and finding the fault when one
+              misbehaves.
             </p>
           </article>
 
